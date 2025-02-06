@@ -186,6 +186,7 @@ contract NetworkState is ReentrancyGuard {
         // Check the Task Request
         Request storage req = requests[_id];
         require(req.completed, "Task not completed");
+        require(req.feedback == 0, "Task already reviewed");
         require(_feedbackScore >=0 && _feedbackScore <= 10, "Invalid feedback score");
 
         // Update the Agent Stats
