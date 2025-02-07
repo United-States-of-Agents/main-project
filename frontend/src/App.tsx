@@ -3,6 +3,9 @@ import { IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
 import { ChatInterface } from "./components/ChatInterface";
 import { EventBus } from "./game/EventBus";
 
+import {WalletOptions, ConnectButton} from '@/components/connection/ConnectWallet';
+import Provider from '@/components/connection/WagmiProvider';
+
 function App() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
     const [isChatting, setIsChatting] = useState(false);
@@ -32,10 +35,19 @@ function App() {
     };
 
     return (
-        <div id="app" className="relative w-full h-screen">
-            <PhaserGame ref={phaserRef} />
-            <ChatInterface isChatting={isChatting} onClose={handleCloseChat} />
-        </div>
+        <Provider>
+            <div id="app" className="relative w-full h-screen">
+                <PhaserGame ref={phaserRef} />
+                <ChatInterface isChatting={isChatting} onClose={handleCloseChat} />
+                
+                {/* #TODO: Web3 Connections For Navbar Here */}
+                <div className="w-screen h-screen bg-black">
+                    Hello Motherfucker
+                    <WalletOptions/>
+                    <ConnectButton/>
+                </div>
+            </div>
+        </Provider>
     );
 }
 
