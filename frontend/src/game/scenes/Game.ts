@@ -89,7 +89,7 @@ export class Game extends Scene {
                     id: "player",
                     sprite: playerSprite,
                     walkingAnimationMapping: 6,
-                    startPosition: { x: 9, y: 13 },
+                    startPosition: { x: 56, y: 13 },
                     container: playerContainer,
                 },
                 ...agents.map((agent, i) => ({
