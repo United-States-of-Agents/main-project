@@ -13,9 +13,6 @@ export class Game extends Scene {
     }
 
     preload() {
-        this.load.image("groundTiles", "assets/Room_Builder_free_32x32.png");
-        this.load.image("worldTiles", "assets/Interiors_free_32x32.png");
-        this.load.tilemapTiledJSON("map", "assets/defaultmap.json");
         this.load.spritesheet("player", "assets/characters.png", {
             frameWidth: 52,
             frameHeight: 72,
@@ -54,6 +51,12 @@ export class Game extends Scene {
         this.cameras.main.setFollowOffset(
             -playerSprite.width / 2,
             -playerSprite.height / 2
+        );
+        this.cameras.main.setBounds(
+            0,
+            0,
+            map.widthInPixels,
+            map.heightInPixels
         );
 
         const agents = [
