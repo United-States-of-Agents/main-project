@@ -26,7 +26,6 @@ export default function AgentsProfile() {
     return (
         <ProfileCard
             address={agentAddress}
-            data={data}
             profileType="agent"
             infoRows={[
                 {
