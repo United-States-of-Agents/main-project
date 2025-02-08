@@ -3,8 +3,11 @@ import { IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
 import { ChatInterface } from "./components/ChatInterface";
 import { EventBus } from "./game/EventBus";
 
-import {WalletOptions, ConnectButton} from '@/components/connection/ConnectWallet';
-import Provider from '@/components/connection/WagmiProvider';
+import {
+    WalletOptions,
+    ConnectButton,
+} from "@/components/connection/ConnectWallet";
+import Provider from "@/components/connection/WagmiProvider";
 import UserProfile from "@/components/UserProfile";
 import AgentsProfile from "@/components/AgentsProfile";
 import PayAgent from "@/components/agents/PayAgent";
@@ -44,17 +47,20 @@ function App() {
         <Provider>
             <div id="app" className="relative w-full h-screen">
                 <PhaserGame ref={phaserRef} />
-                <ChatInterface isChatting={isChatting} onClose={handleCloseChat} />
-                
+                <ChatInterface
+                    isChatting={isChatting}
+                    onClose={handleCloseChat}
+                />
+                <UserProfile />
+
                 {/* #TODO: Web3 Connections For Navbar Here */}
-                <div className="w-screen h-screen bg-black">
-                    <ConnectButton/>
-                    <UserProfile />
-                    <AgentsProfile/>
+                <div className="w-screen/2 h-screen bg-black">
+                    <ConnectButton />
+                    <AgentsProfile />
                     <AcceptTask />
-                    <PayAgent/>
-                    <CreateAgent/>
-                    <AddReview/>
+                    <PayAgent />
+                    <CreateAgent />
+                    <AddReview />
                 </div>
             </div>
         </Provider>
