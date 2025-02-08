@@ -165,14 +165,27 @@ export class Game extends Scene {
             : this.normalSpeed;
         this.gridEngine.setSpeed("player", speed);
 
-        const cursors = this.input.keyboard!.createCursorKeys();
-        if (cursors.left.isDown) {
+        // WASD Controls
+        const wKey = this.input.keyboard!.addKey(
+            Phaser.Input.Keyboard.KeyCodes.W
+        );
+        const aKey = this.input.keyboard!.addKey(
+            Phaser.Input.Keyboard.KeyCodes.A
+        );
+        const sKey = this.input.keyboard!.addKey(
+            Phaser.Input.Keyboard.KeyCodes.S
+        );
+        const dKey = this.input.keyboard!.addKey(
+            Phaser.Input.Keyboard.KeyCodes.D
+        );
+
+        if (aKey.isDown) {
             this.gridEngine.move("player", Direction.LEFT);
-        } else if (cursors.right.isDown) {
+        } else if (dKey.isDown) {
             this.gridEngine.move("player", Direction.RIGHT);
-        } else if (cursors.up.isDown) {
+        } else if (wKey.isDown) {
             this.gridEngine.move("player", Direction.UP);
-        } else if (cursors.down.isDown) {
+        } else if (sKey.isDown) {
             this.gridEngine.move("player", Direction.DOWN);
         }
 
