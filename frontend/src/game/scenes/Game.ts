@@ -110,6 +110,11 @@ export class Game extends Scene {
 
         this.gridEngine.create(map, gridEngineConfig);
 
+        // Make agents move randomly
+        agents.forEach((agent, i) => {
+            this.gridEngine.moveRandomly(agent.id, 3000 + i * 500, 15);
+        });
+
         // Keyboard input
         this.interactionKey = this.input.keyboard!.addKey(
             Phaser.Input.Keyboard.KeyCodes.E
