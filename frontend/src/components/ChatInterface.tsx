@@ -9,11 +9,9 @@ import { MiniAgentProfile } from "./MiniAgentProfile";
 
 type ChatMessage =
     | { sender: "user"; text: string }
-    | { sender: "agent"; text: string };
+    | { sender: "agent"; text: string }
+    | { sender: "typing" };
 
-const AGENT_ADDRESS = "0x74EF2a3c2CC1446643Ab59e5b65dd86665521F1c";
-
-// Temporary hardcoded responses for agents
 const AGENT_RESPONSES: Record<string, string[]> = {
     Marcus: ["Hello!", "How can I help?", "Nice to meet you!"],
     Julie: ["Hey there!", "What do you need?", "I'm busy but I'll chat."],
@@ -71,7 +69,6 @@ export function ChatInterface({
     const handleSendMessage = () => {
         if (!message.trim() || !currentAgent) return;
 
-        // Add user message to chat history
         setChatHistory((prev) => ({
             ...prev,
             [currentAgent]: [
@@ -85,7 +82,20 @@ export function ChatInterface({
             text: message,
         });
 
-        // Trigger agent response after 1.5 seconds
+        setMessage("");
+
+        // Show animated "..." before response
+        setTimeout(() => {
+            setChatHistory((prev) => ({
+                ...prev,
+                [currentAgent]: [
+                    ...(prev[currentAgent] || []),
+                    { sender: "typing" },
+                ],
+            }));
+        }, 500);
+
+        // Agent response after 2 seconds
         setTimeout(() => {
             const agentResponse =
                 AGENT_RESPONSES[currentAgent]?.[
@@ -94,16 +104,19 @@ export function ChatInterface({
                     )
                 ] || "I don't have much to say right now.";
 
-            setChatHistory((prev) => ({
-                ...prev,
-                [currentAgent]: [
-                    ...(prev[currentAgent] || []),
-                    { sender: "agent", text: agentResponse },
-                ],
-            }));
-        }, 1500);
+            setChatHistory((prev) => {
+                const newMessages = prev[currentAgent] || [];
 
-        setMessage("");
+                // Remove the typing animation before adding the response
+                return {
+                    ...prev,
+                    [currentAgent]: [
+                        ...newMessages.filter((msg) => msg.sender !== "typing"),
+                        { sender: "agent", text: agentResponse },
+                    ],
+                };
+            });
+        }, 2000);
     };
 
     return (
@@ -120,7 +133,9 @@ export function ChatInterface({
                     <div className="relative">
                         <MiniAgentProfile
                             agentName={currentAgent}
-                            agentAddress={AGENT_ADDRESS}
+                            agentAddress={
+                                "0x74EF2a3c2CC1446643Ab59e5b65dd86665521F1c"
+                            }
                         />
                         <Button
                             variant="ghost"
@@ -134,7 +149,7 @@ export function ChatInterface({
 
                 {/* Chat Messages */}
                 <CardContent className="flex-1 overflow-hidden">
-                    <ScrollArea className="h-[400px] overflow-y-auto py-2 flex flex-col gap-2">
+                    <ScrollArea className="h-[700px] overflow-y-auto py-2 flex flex-col gap-2">
                         <div className="flex flex-col">
                             {chatHistory[currentAgent!]?.map((msg, index) => (
                                 <div
@@ -145,7 +160,11 @@ export function ChatInterface({
                                             : "shadow-purple-600 self-start text-left"
                                     }`}
                                 >
-                                    {msg.text}
+                                    {msg.sender === "typing" ? (
+                                        <TypingIndicator />
+                                    ) : (
+                                        msg.text
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -180,6 +199,40 @@ export function ChatInterface({
                     </Button>
                 </div>
             </Card>
+        </div>
+    );
+}
+
+/**
+ * Typing Indicator: Three dots animating up and down smoothly
+ */
+function TypingIndicator() {
+    return (
+        <div className="flex space-x-1 p-1">
+            <span className="dot-animation bg-gray-400 rounded-full w-1.5 h-1.5"></span>
+            <span className="dot-animation bg-gray-400 rounded-full w-1.5 h-1.5 animation-delay-200"></span>
+            <span className="dot-animation bg-gray-400 rounded-full w-1.5 h-1.5 animation-delay-400"></span>
+            <style jsx>{`
+                .dot-animation {
+                    animation: bounce 1.4s infinite;
+                }
+                .animation-delay-200 {
+                    animation-delay: 0.2s;
+                }
+                .animation-delay-400 {
+                    animation-delay: 0.4s;
+                }
+                @keyframes bounce {
+                    0%,
+                    80%,
+                    100% {
+                        transform: translateY(0);
+                    }
+                    40% {
+                        transform: translateY(-5px);
+                    }
+                }
+            `}</style>
         </div>
     );
 }
