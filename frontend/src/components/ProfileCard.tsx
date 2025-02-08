@@ -6,7 +6,7 @@ import type React from "react";
 
 interface InfoRowProps {
     label: string;
-    value: any;
+    value: React.ReactNode;
     icon?: React.ReactNode;
 }
 
@@ -71,7 +71,9 @@ export function ProfileCard({
 function InfoBox({ label, value, icon }: InfoRowProps) {
     return (
         <div className="bg-white/50 rounded-lg p-3 flex flex-col items-center justify-center">
-            <div className="text-xs font-medium mb-1 truncate">{label}</div>
+            <div className="text-xs font-medium mb-1 truncate w-full text-center">
+                {label}
+            </div>
             <div className="flex items-center space-x-1">
                 {icon}
                 <span className="text-lg font-bold">{value}</span>
