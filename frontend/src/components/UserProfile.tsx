@@ -35,7 +35,7 @@ export default function UserProfile() {
                 },
                 {
                     label: "Token Balance",
-                    value: <Balance address={address} />,
+                    value: <Balance address={address || ""} />,
                     icon: <TokenLogo />,
                 },
                 {
