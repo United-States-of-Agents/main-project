@@ -18,8 +18,9 @@ export class Game extends Scene {
     shiftKey!: Phaser.Input.Keyboard.Key;
     agentContainers: Record<string, Phaser.GameObjects.Container> = {};
     isChatting = false;
-    normalSpeed = 6; // Default movement speed
-    sprintSpeed = 10; // Sprinting speed
+    chattingAgent: string | null = null;
+    normalSpeed = 6;
+    sprintSpeed = 10;
 
     constructor() {
         super("Game");
@@ -154,6 +155,10 @@ export class Game extends Scene {
         });
 
         EventBus.on("chat-closed", () => {
+            if (this.chattingAgent) {
+                this.resumeAgentMovement(this.chattingAgent);
+                this.chattingAgent = null;
+            }
             this.isChatting = false;
         });
 
@@ -211,6 +216,10 @@ export class Game extends Scene {
             if (distance === 1) {
                 // Ensure game knows a chat is starting
                 this.isChatting = true;
+                this.chattingAgent = agent.id;
+
+                // Stop agent movement
+                this.gridEngine.stopMovement(agent.id);
 
                 // Emit event with agent info
                 EventBus.emit("agent-interaction", agent.id);
@@ -218,5 +227,9 @@ export class Game extends Scene {
                 return;
             }
         }
+    }
+
+    resumeAgentMovement(agentId: string) {
+        this.gridEngine.moveRandomly(agentId, 3000, 15);
     }
 }
