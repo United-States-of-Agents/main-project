@@ -3,9 +3,10 @@ import { Scene } from "phaser";
 import GridEngine, { Direction } from "grid-engine";
 
 const AGENTS = [
-    { id: "Marcus", position: { x: 9, y: 30 } },
-    { id: "Julie", position: { x: 13, y: 11 } },
-    { id: "Leonardo", position: { x: 85, y: 11 } },
+    { id: "Marcus", position: { x: 9, y: 30 }, walkingAnimationMapping: 0 },
+    { id: "Julie", position: { x: 13, y: 11 }, walkingAnimationMapping: 1 },
+    { id: "Leonardo", position: { x: 85, y: 11 }, walkingAnimationMapping: 2 },
+    { id: "Alan", position: { x: 87, y: 30 }, walkingAnimationMapping: 4 },
 ];
 
 export class Game extends Scene {
@@ -96,11 +97,11 @@ export class Game extends Scene {
                     startPosition: { x: 56, y: 13 },
                     speed: this.normalSpeed,
                 },
-                ...AGENTS.map((agent, i) => ({
+                ...AGENTS.map((agent) => ({
                     id: agent.id,
                     sprite: this.agentContainers[agent.id]
                         .list[0] as Phaser.GameObjects.Sprite,
-                    walkingAnimationMapping: i,
+                    walkingAnimationMapping: agent.walkingAnimationMapping,
                     startPosition: agent.position,
                     container: this.agentContainers[agent.id],
                 })),
