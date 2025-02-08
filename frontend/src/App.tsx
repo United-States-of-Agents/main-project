@@ -52,10 +52,10 @@ function App() {
                     onClose={handleCloseChat}
                 />
                 <UserProfile />
+                <ConnectButton />
 
                 {/* #TODO: Web3 Connections For Navbar Here */}
-                <div className="w-screen/2 h-screen bg-black">
-                    <ConnectButton />
+                <div className="w-screen/2 h-screen bg-black mt-20">
                     <AgentsProfile />
                     <AcceptTask />
                     <PayAgent />
