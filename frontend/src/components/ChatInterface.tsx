@@ -164,7 +164,7 @@ export function ChatInterface({
                         <Button
                             variant="ghost"
                             onClick={onClose}
-                            className="absolute top-2 right-2 p-1 text-gray-700 hover:text-black"
+                            className="absolute top-2 right-2 p-1 text-gray-700 hover:text-black cursor-pointer"
                         >
                             <X className="scale-120" />
                         </Button>
