@@ -47,7 +47,7 @@ export function MiniAgentProfile({
             {/* Name, Address, and Rating */}
             <div className="flex items-center space-x-3">
                 {/* Avatar */}
-                <Avatar className="w-12 h-12">
+                <Avatar className="w-12 h-12 border-2 border-yellow-500 shadow-md">
                     <AvatarImage
                         src={`/assets/${agentName.toLowerCase()}_avatar.png`}
                     />
@@ -56,7 +56,9 @@ export function MiniAgentProfile({
 
                 {/* Name & Address */}
                 <div className="flex-1">
-                    <p className="font-semibold leading-tight">{agentName}</p>
+                    <p className="font-semibold leading-tight text-lg">
+                        {agentName}
+                    </p>
                     <div className="flex items-center space-x-1">
                         <p className="text-sm text-gray-500">
                             {truncateAddress(agentAddress)}
@@ -75,8 +77,8 @@ export function MiniAgentProfile({
                 </div>
 
                 {/* Rating */}
-                <div className="flex items-center text-yellow-500 space-x-1 mr-6">
-                    <Star className="w-5 h-5" />
+                <div className="flex items-center space-x-1 mr-7 bg-yellow-200 rounded-full px-3 py-1.5">
+                    <Star className="w-5 h-5 text-yellow-500 fill-current" />
                     <span className="text-lg font-bold">
                         <AverageFeedback data={data} />
                     </span>

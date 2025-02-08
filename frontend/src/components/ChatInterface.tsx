@@ -9,9 +9,17 @@ import { MiniAgentProfile } from "./MiniAgentProfile";
 
 type ChatMessage =
     | { sender: "user"; text: string }
-    | { sender: "agent"; text: string };
+    | { sender: "agent"; text: string }
+    | { sender: "typing" };
 
-const AGENT_ADDRESS = "0x74EF2a3c2CC1446643Ab59e5b65dd86665521F1c";
+const AGENT_RESPONSES: Record<string, string[]> = {
+    Marcus: ["Hello!", "How can I help?", "Nice to meet you!"],
+    Julie: ["Hey there!", "What do you need?", "I'm busy but I'll chat."],
+    Leonardo: ["Greetings!", "Need assistance?", "Always here to help."],
+    Alan: ["Hi!", "Have any questions?", "Let's talk."],
+    Troy: ["Yo!", "What brings you here?", "Nice to see you."],
+    Linda: ["Hey!", "Hope you're having a great day!", "Let's chat!"],
+};
 
 export function ChatInterface({
     isChatting,
@@ -57,7 +65,7 @@ export function ChatInterface({
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [onClose]);
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (!message.trim() || !currentAgent) return;
 
         setChatHistory((prev) => ({
@@ -74,6 +82,65 @@ export function ChatInterface({
         });
 
         setMessage("");
+
+        // Show animated "..." before response
+        setTimeout(() => {
+            setChatHistory((prev) => ({
+                ...prev,
+                [currentAgent]: [
+                    ...(prev[currentAgent] || []),
+                    { sender: "typing" },
+                ],
+            }));
+        }, 500);
+
+        // If chatting with Sara, use OpenAI API
+        if (currentAgent === "Sara") {
+            try {
+                const response = await fetch("/api/agent-response", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        agentName: currentAgent,
+                        userMessage: message,
+                    }),
+                });
+
+                const data = await response.json();
+
+                setChatHistory((prev) => ({
+                    ...prev,
+                    [currentAgent]: [
+                        ...(prev[currentAgent] || []).filter(
+                            (msg) => msg.sender !== "typing"
+                        ),
+                        { sender: "agent", text: data.response },
+                    ],
+                }));
+            } catch (error) {
+                console.error("Error fetching agent response:", error);
+            }
+        } else {
+            // For other agents, use predefined responses
+            const fallbackResponse =
+                AGENT_RESPONSES[currentAgent]?.[
+                    Math.floor(
+                        Math.random() * AGENT_RESPONSES[currentAgent].length
+                    )
+                ] || "I don't have much to say right now.";
+
+            setTimeout(() => {
+                setChatHistory((prev) => ({
+                    ...prev,
+                    [currentAgent]: [
+                        ...(prev[currentAgent] || []).filter(
+                            (msg) => msg.sender !== "typing"
+                        ),
+                        { sender: "agent", text: fallbackResponse },
+                    ],
+                }));
+            }, 1500); // Simulate delay for natural response
+        }
     };
 
     return (
@@ -84,18 +151,20 @@ export function ChatInterface({
                     : "translate-x-full right-0"
             }`}
         >
-            <Card className="h-full flex flex-col text-black border-0 bg-yellow-50/70 backdrop-blur-lg shadow-lg mb-[72px]">
+            <Card className="h-full flex flex-col text-black border-0 bg-yellow-50/70 backdrop-blur-lg shadow z-10 mb-[72px]">
                 {/* Mini Agent Profile with Close Button */}
                 {currentAgent && (
                     <div className="relative">
                         <MiniAgentProfile
                             agentName={currentAgent}
-                            agentAddress={AGENT_ADDRESS}
+                            agentAddress={
+                                "0x74EF2a3c2CC1446643Ab59e5b65dd86665521F1c"
+                            }
                         />
                         <Button
                             variant="ghost"
                             onClick={onClose}
-                            className="absolute top-2 right-2 p-1 text-gray-700 hover:text-black"
+                            className="absolute top-2 right-2 p-1 text-gray-700 hover:text-black cursor-pointer"
                         >
                             <X className="scale-120" />
                         </Button>
@@ -103,8 +172,9 @@ export function ChatInterface({
                 )}
 
                 {/* Chat Messages */}
-                <CardContent className="flex-1 overflow-hidden">
-                    <ScrollArea className="h-[400px] overflow-y-auto py-2 flex flex-col gap-2">
+                <CardContent className="flex-1 py-0 px-6 overflow-hidden">
+                    {/* Currently hardcoded the height*/}
+                    <ScrollArea className="h-[72vh] overflow-y-auto flex flex-col gap-2">
                         <div className="flex flex-col">
                             {chatHistory[currentAgent!]?.map((msg, index) => (
                                 <div
@@ -115,7 +185,11 @@ export function ChatInterface({
                                             : "shadow-purple-600 self-start text-left"
                                     }`}
                                 >
-                                    {msg.text}
+                                    {msg.sender === "typing" ? (
+                                        <TypingIndicator />
+                                    ) : (
+                                        msg.text
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -150,6 +224,40 @@ export function ChatInterface({
                     </Button>
                 </div>
             </Card>
+        </div>
+    );
+}
+
+/**
+ * Typing Indicator: Three dots animating up and down smoothly
+ */
+function TypingIndicator() {
+    return (
+        <div className="flex space-x-1 p-1">
+            <span className="dot-animation bg-gray-400 rounded-full w-1.5 h-1.5"></span>
+            <span className="dot-animation bg-gray-400 rounded-full w-1.5 h-1.5 animation-delay-200"></span>
+            <span className="dot-animation bg-gray-400 rounded-full w-1.5 h-1.5 animation-delay-400"></span>
+            <style jsx>{`
+                .dot-animation {
+                    animation: bounce 1.4s infinite;
+                }
+                .animation-delay-200 {
+                    animation-delay: 0.2s;
+                }
+                .animation-delay-400 {
+                    animation-delay: 0.4s;
+                }
+                @keyframes bounce {
+                    0%,
+                    80%,
+                    100% {
+                        transform: translateY(0);
+                    }
+                    40% {
+                        transform: translateY(-5px);
+                    }
+                }
+            `}</style>
         </div>
     );
 }
