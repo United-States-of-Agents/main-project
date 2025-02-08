@@ -3,33 +3,39 @@ import { IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
 import { ChatInterface } from "./components/ChatInterface";
 import { EventBus } from "./game/EventBus";
 
-import {WalletOptions, ConnectButton} from '@/components/connection/ConnectWallet';
-import Provider from '@/components/connection/WagmiProvider';
+import {
+    WalletOptions,
+    ConnectButton,
+} from "@/components/connection/ConnectWallet";
+import Provider from "@/components/connection/WagmiProvider";
 import UserProfile from "@/components/UserProfile";
-import AgentsProfile from "@/components/AgentsProfile";
-import PayAgent from "@/components/agents/PayAgent";
-import CreateAgent from "@/components/agents/CreateAgent";
-import AcceptTask from "@/components/agents/AcceptTask";
-import AddReview from "@/components/agents/AddReview";
 
 function App() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
     const [isChatting, setIsChatting] = useState(false);
+    const [currentAgent, setCurrentAgent] = useState<string | null>(null);
 
     useEffect(() => {
-        EventBus.on("agent-interaction", () => {
+        const handleAgentInteraction = (agentId: string) => {
+            setCurrentAgent(agentId);
             setIsChatting(true);
-        });
+        };
+
+        EventBus.on("agent-interaction", handleAgentInteraction);
 
         return () => {
-            EventBus.off("agent-interaction");
+            EventBus.off("agent-interaction", handleAgentInteraction);
         };
     }, []);
 
     const handleCloseChat = () => {
         setIsChatting(false);
+        setCurrentAgent(null);
 
-        // Reset the 'E' key state in Phaser
+        // Ensure Phaser knows chat is closed
+        EventBus.emit("chat-closed");
+
+        // Reset 'E' key state
         if (phaserRef.current) {
             const scene = phaserRef.current.scene;
             if (scene) {
@@ -44,18 +50,13 @@ function App() {
         <Provider>
             <div id="app" className="relative w-full h-screen">
                 <PhaserGame ref={phaserRef} />
-                <ChatInterface isChatting={isChatting} onClose={handleCloseChat} />
-                
-                {/* #TODO: Web3 Connections For Navbar Here */}
-                <div className="w-screen h-screen bg-black">
-                    <ConnectButton/>
-                    <UserProfile />
-                    <AgentsProfile/>
-                    <AcceptTask />
-                    <PayAgent/>
-                    <CreateAgent/>
-                    <AddReview/>
-                </div>
+                <ChatInterface
+                    isChatting={isChatting}
+                    currentAgent={currentAgent}
+                    onClose={handleCloseChat}
+                />
+                <UserProfile />
+                <ConnectButton />
             </div>
         </Provider>
     );
