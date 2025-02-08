@@ -1,7 +1,15 @@
+import { useState } from "react";
 import { useReadContract } from "wagmi";
 import { networkStateContractConfig } from "@/utils/wagmiContractConfig";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, CheckSquare, TrendingUp, Award } from "lucide-react";
+import {
+    Star,
+    CheckSquare,
+    TrendingUp,
+    Award,
+    Copy,
+    Check,
+} from "lucide-react";
 import { truncateAddress } from "@/utils/formatData";
 import {
     AverageFeedback,
@@ -19,6 +27,7 @@ export function MiniAgentProfile({
     agentName: string;
     agentAddress: string;
 }) {
+    const [copied, setCopied] = useState(false);
     const contractConfig = {
         ...networkStateContractConfig,
         functionName: "agents",
@@ -27,28 +36,44 @@ export function MiniAgentProfile({
 
     const { data } = useReadContract(contractConfig);
 
+    const handleCopy = () => {
+        navigator.clipboard.writeText(agentAddress);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
+    };
+
     return (
         <div className="flex flex-col p-3 bg-yellow-100 rounded-t-md shadow-md">
             {/* Name, Address, and Rating */}
             <div className="flex items-center space-x-3">
                 {/* Avatar */}
-                <Avatar className="w-10 h-10">
+                <Avatar className="w-12 h-12">
                     <AvatarImage src="/assets/default_character.png" />
                     <AvatarFallback>AG</AvatarFallback>
                 </Avatar>
 
                 {/* Name & Address */}
                 <div className="flex-1">
-                    <p className="text-sm font-semibold leading-tight">
-                        {agentName}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                        {truncateAddress(agentAddress)}
-                    </p>
+                    <p className="font-semibold leading-tight">{agentName}</p>
+                    <div className="flex items-center space-x-1">
+                        <p className="text-sm text-gray-500">
+                            {truncateAddress(agentAddress)}
+                        </p>
+                        <button
+                            onClick={handleCopy}
+                            className="text-gray-500 transition-colors hover:text-black pl-0.5"
+                        >
+                            {copied ? (
+                                <Check size={14} className="text-green-500" />
+                            ) : (
+                                <Copy size={14} className="cursor-pointer" />
+                            )}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Rating */}
-                <div className="flex items-center text-yellow-500 space-x-1 mr-8">
+                <div className="flex items-center text-yellow-500 space-x-1 mr-6">
                     <Star className="w-5 h-5" />
                     <span className="text-lg font-bold">
                         <AverageFeedback data={data} />
@@ -57,7 +82,7 @@ export function MiniAgentProfile({
             </div>
 
             {/* Stats Row */}
-            <div className="flex justify-between items-center mt-4 mx-4 text-xs text-gray-700">
+            <div className="flex justify-between items-center mt-5 mx-4 text-xs text-gray-700">
                 <Stat
                     label="Balance"
                     value={<Balance address={agentAddress} />}
