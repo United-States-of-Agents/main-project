@@ -23,8 +23,8 @@ export default function UserProfile() {
     return (
         <ProfileCard
             address={address || ""}
-            data={data}
             profileType="user"
+            avatarImageURL="/assets/player_avatar.png"
             infoRows={[
                 {
                     label: "Average Feedback",

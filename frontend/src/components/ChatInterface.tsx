@@ -78,13 +78,13 @@ export function ChatInterface({
 
     return (
         <div
-            className={`fixed top-14 h-full w-md flex flex-col transition-transform ${
+            className={`fixed top-16 h-full w-md flex flex-col transition-transform ${
                 isChatting
-                    ? "translate-x-0 right-2"
+                    ? "translate-x-0 right-4"
                     : "translate-x-full right-0"
             }`}
         >
-            <Card className="h-full flex flex-col text-black border-0 bg-yellow-50/70 backdrop-blur-lg shadow-lg mb-16">
+            <Card className="h-full flex flex-col text-black border-0 bg-yellow-50/70 backdrop-blur-lg shadow-lg mb-[72px]">
                 {/* Mini Agent Profile with Close Button */}
                 {currentAgent && (
                     <div className="relative">
