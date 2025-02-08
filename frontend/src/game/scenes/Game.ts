@@ -2,20 +2,27 @@ import { EventBus } from "../EventBus";
 import { Scene } from "phaser";
 import GridEngine, { Direction } from "grid-engine";
 
+const AGENTS = [
+    { id: "Marcus", position: { x: 9, y: 30 }, walkingAnimationMapping: 0 },
+    { id: "Julie", position: { x: 13, y: 11 }, walkingAnimationMapping: 1 },
+    { id: "Leonardo", position: { x: 85, y: 11 }, walkingAnimationMapping: 2 },
+    { id: "Alan", position: { x: 87, y: 30 }, walkingAnimationMapping: 4 },
+];
+
 export class Game extends Scene {
     gridEngine!: GridEngine;
     interactionKey!: Phaser.Input.Keyboard.Key;
+    shiftKey!: Phaser.Input.Keyboard.Key;
     agentContainers: Record<string, Phaser.GameObjects.Container> = {};
     isChatting = false;
+    normalSpeed = 6; // Default movement speed
+    sprintSpeed = 10; // Sprinting speed
 
     constructor() {
         super("Game");
     }
 
     preload() {
-        this.load.image("groundTiles", "assets/Room_Builder_free_32x32.png");
-        this.load.image("worldTiles", "assets/Interiors_free_32x32.png");
-        this.load.tilemapTiledJSON("map", "assets/defaultmap.json");
         this.load.spritesheet("player", "assets/characters.png", {
             frameWidth: 52,
             frameHeight: 72,
@@ -55,14 +62,14 @@ export class Game extends Scene {
             -playerSprite.width / 2,
             -playerSprite.height / 2
         );
+        this.cameras.main.setBounds(
+            0,
+            0,
+            map.widthInPixels,
+            map.heightInPixels
+        );
 
-        const agents = [
-            { id: "agent0", position: { x: 9, y: 11 } },
-            { id: "agent1", position: { x: 13, y: 11 } },
-            { id: "agent2", position: { x: 17, y: 11 } },
-        ];
-
-        agents.forEach((agent) => {
+        AGENTS.forEach((agent) => {
             const agentSprite = this.add.sprite(0, 0, "player");
             const dialogueText = this.add
                 .text(0, -20, "", {
@@ -85,41 +92,55 @@ export class Game extends Scene {
                 {
                     id: "player",
                     sprite: playerSprite,
-                    walkingAnimationMapping: 6,
-                    startPosition: { x: 9, y: 13 },
                     container: playerContainer,
+                    walkingAnimationMapping: 6,
+                    startPosition: { x: 56, y: 13 },
+                    speed: this.normalSpeed,
                 },
-                ...agents.map((agent, i) => ({
+                ...AGENTS.map((agent) => ({
                     id: agent.id,
                     sprite: this.agentContainers[agent.id]
                         .list[0] as Phaser.GameObjects.Sprite,
-                    walkingAnimationMapping: i,
+                    walkingAnimationMapping: agent.walkingAnimationMapping,
                     startPosition: agent.position,
-                    speed: 3,
                     container: this.agentContainers[agent.id],
                 })),
             ],
         };
 
         this.gridEngine.create(map, gridEngineConfig);
+
+        // Make agents move randomly
+        AGENTS.forEach((agent, i) => {
+            this.gridEngine.moveRandomly(agent.id, 3000 + i * 500, 15);
+        });
+
+        // Keyboard input
         this.interactionKey = this.input.keyboard!.addKey(
             Phaser.Input.Keyboard.KeyCodes.E
         );
+        this.shiftKey = this.input.keyboard!.addKey(
+            Phaser.Input.Keyboard.KeyCodes.SHIFT
+        );
 
-        this.events.on("agent-message", ({ agentId, text }) => {
-            const agentContainer = this.agentContainers[agentId];
-            if (!agentContainer) return;
+        // Event listeners
+        this.events.on(
+            "agent-message",
+            ({ agentId, text }: { agentId: string; text: string }) => {
+                const agentContainer = this.agentContainers[agentId];
+                if (!agentContainer) return;
 
-            const dialogueText = agentContainer.getAt(
-                1
-            ) as Phaser.GameObjects.Text;
-            dialogueText.setText(text);
-            dialogueText.setVisible(true);
+                const dialogueText = agentContainer.getAt(
+                    1
+                ) as Phaser.GameObjects.Text;
+                dialogueText.setText(text);
+                dialogueText.setVisible(true);
 
-            this.time.delayedCall(3000, () => {
-                dialogueText.setVisible(false);
-            });
-        });
+                this.time.delayedCall(3000, () => {
+                    dialogueText.setVisible(false);
+                });
+            }
+        );
 
         EventBus.on("disable-game-input", () => {
             this.input.keyboard!.enabled = false; // Disable Phaser keyboard
@@ -138,6 +159,11 @@ export class Game extends Scene {
 
     update() {
         if (this.isChatting) return; // Prevent movement during chat
+
+        const speed = this.shiftKey.isDown
+            ? this.sprintSpeed
+            : this.normalSpeed;
+        this.gridEngine.setSpeed("player", speed);
 
         const cursors = this.input.keyboard!.createCursorKeys();
         if (cursors.left.isDown) {
@@ -159,16 +185,15 @@ export class Game extends Scene {
         if (this.isChatting) return;
 
         const playerPos = this.gridEngine.getPosition("player");
-        const agents = ["agent0", "agent1", "agent2"];
 
-        for (const agentId of agents) {
-            const agentPos = this.gridEngine.getPosition(agentId);
+        for (const agent of AGENTS) {
+            const agentPos = this.gridEngine.getPosition(agent.id);
             const distance =
                 Math.abs(playerPos.x - agentPos.x) +
                 Math.abs(playerPos.y - agentPos.y);
 
-            if (distance === 2) {
-                EventBus.emit("agent-interaction", agentId);
+            if (distance === 1) {
+                EventBus.emit("agent-interaction", agent.id);
                 return;
             }
         }
