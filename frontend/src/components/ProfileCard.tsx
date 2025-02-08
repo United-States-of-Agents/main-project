@@ -12,7 +12,6 @@ interface InfoRowProps {
 
 interface ProfileCardProps {
     address: string;
-    data: any;
     profileType: "user" | "agent";
     infoRows: InfoRowProps[];
     avatarImageURL?: string;
@@ -20,8 +19,6 @@ interface ProfileCardProps {
 
 export function ProfileCard({
     address,
-    data,
-    profileType,
     infoRows,
     avatarImageURL,
 }: ProfileCardProps) {
@@ -33,37 +30,39 @@ export function ProfileCard({
     );
 
     return (
-        <Card
-            className={`fixed ${
-                profileType === "user" ? "left-2 bottom-2" : "top-2 left-2"
-            } bg-yellow-50/70 backdrop-blur-md shadow-xl text-black border-0 w-72`}
-        >
-            <CardContent className="p-6">
-                <div className="flex flex-col items-center mb-4">
-                    <Avatar className="w-24 h-24">
-                        <AvatarImage
-                            src={
-                                avatarImageURL ||
-                                "/assets/default_character.png"
-                            }
-                            alt="User profile"
-                        />
-                        <AvatarFallback>UN</AvatarFallback>
-                    </Avatar>
-                    {feedbackRow && (
-                        <div className="flex items-center space-x-2 bg-yellow-100 rounded-full px-3 py-1 -mt-3 z-10">
-                            <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                            <span className="text-lg font-bold">
-                                {feedbackRow.value}
-                            </span>
-                        </div>
-                    )}
-                    <div className="text-sm text-muted-foreground text-center bg-gray-400 px-3 py-1 rounded-full my-2">
-                        <p className="font-mono">{truncateAddress(address)}</p>
+        <Card className="fixed left-3 bottom-3 bg-yellow-50/80 backdrop-blur-xl shadow-xl text-black border-0 rounded-xl overflow-hidden">
+            <CardContent className="p-5 flex items-center space-x-3">
+                <div className="space-y-4">
+                    {/* Avatar & Rating */}
+                    <div className="relative flex flex-col items-center">
+                        <Avatar className="w-20 h-20 border-2 border-white shadow-md">
+                            <AvatarImage
+                                src={
+                                    avatarImageURL ||
+                                    "/assets/default_character.png"
+                                }
+                                alt="User profile"
+                            />
+                            <AvatarFallback>UN</AvatarFallback>
+                        </Avatar>
+                        {feedbackRow && (
+                            <div className="absolute -bottom-2 flex items-center bg-yellow-200 rounded-full px-2 py-0.5 shadow">
+                                <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                                <span className="text-sm font-bold ml-1">
+                                    {feedbackRow.value}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Wallet Address */}
+                    <div className="bg-gray-300 px-3 py-1 rounded-full text-xs font-mono shadow">
+                        {truncateAddress(address)}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                {/* Stats Grid (Balanced Layout) */}
+                <div className="w-full space-y-2">
                     {otherRows.map((row, index) => (
                         <InfoBox key={index} {...row} />
                     ))}
@@ -75,18 +74,16 @@ export function ProfileCard({
 
 function InfoBox({ label, value, icon }: InfoRowProps) {
     return (
-        <div className="bg-white/50 rounded-lg p-3 flex flex-col items-center justify-center">
-            <div className="text-xs font-medium mb-1 truncate w-full text-center">
-                {label}
-            </div>
-            <div className="flex items-center space-x-1">
+        <div className="flex flex-col items-center bg-white/60 rounded-md p-2 shadow-sm transition-all hover:bg-white/80 hover:shadow-md w-full">
+            <div className="flex items-center justify-center space-x-1 text-xs font-semibold text-gray-700 w-full">
                 {icon}
-                <span className="text-lg font-bold">{value}</span>
+                <span className="max-w-full text-center">{label}</span>
             </div>
+            <span className="text-sm font-bold mt-1">{value}</span>
         </div>
     );
 }
 
 export function TokenLogo() {
-    return <img src="/assets/token.png" alt="Token Logo" className="w-6 h-6" />;
+    return <img src="/assets/token.png" alt="Token Logo" className="w-5 h-5" />;
 }

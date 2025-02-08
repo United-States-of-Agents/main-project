@@ -10,7 +10,7 @@ export function ConnectButton() {
     const { disconnect } = useDisconnect();
 
     return (
-        <div className="fixed top-4 right-4">
+        <div className="fixed top-3 right-3">
             <Button
                 className="flex items-center gap-2 px-5 py-5 text-lg font-semibold rounded-full shadow-lg bg-gradient-to-r from-yellow-100 to-yellow-200 text-black transition-shadow hover:shadow-xl cursor-pointer"
                 onClick={() =>

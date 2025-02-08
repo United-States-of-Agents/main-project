@@ -8,7 +8,7 @@ export const ControlGuide: React.FC = () => {
     if (!isVisible) return null;
 
     return (
-        <div className="fixed top-4 left-4 bg-yellow-50/70 backdrop-blur-md p-4 rounded-lg shadow-md text-black w-56">
+        <div className="fixed top-3 left-3 bg-yellow-50/70 backdrop-blur-md p-4 rounded-lg shadow-md text-black w-56">
             <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold">Controls</h3>
                 <button
