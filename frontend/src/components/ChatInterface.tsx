@@ -94,29 +94,52 @@ export function ChatInterface({
             }));
         }, 500);
 
-        try {
-            const response = await fetch("/api/agent-response", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    agentName: currentAgent,
-                    userMessage: message,
-                }),
-            });
+        // If chatting with Sara, use OpenAI API
+        if (currentAgent === "Sara") {
+            try {
+                const response = await fetch("/api/agent-response", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        agentName: currentAgent,
+                        userMessage: message,
+                    }),
+                });
 
-            const data = await response.json();
+                const data = await response.json();
 
-            setChatHistory((prev) => ({
-                ...prev,
-                [currentAgent]: [
-                    ...(prev[currentAgent] || []).filter(
-                        (msg) => msg.sender !== "typing"
-                    ),
-                    { sender: "agent", text: data.response },
-                ],
-            }));
-        } catch (error) {
-            console.error("Error fetching agent response:", error);
+                setChatHistory((prev) => ({
+                    ...prev,
+                    [currentAgent]: [
+                        ...(prev[currentAgent] || []).filter(
+                            (msg) => msg.sender !== "typing"
+                        ),
+                        { sender: "agent", text: data.response },
+                    ],
+                }));
+            } catch (error) {
+                console.error("Error fetching agent response:", error);
+            }
+        } else {
+            // For other agents, use predefined responses
+            const fallbackResponse =
+                AGENT_RESPONSES[currentAgent]?.[
+                    Math.floor(
+                        Math.random() * AGENT_RESPONSES[currentAgent].length
+                    )
+                ] || "I don't have much to say right now.";
+
+            setTimeout(() => {
+                setChatHistory((prev) => ({
+                    ...prev,
+                    [currentAgent]: [
+                        ...(prev[currentAgent] || []).filter(
+                            (msg) => msg.sender !== "typing"
+                        ),
+                        { sender: "agent", text: fallbackResponse },
+                    ],
+                }));
+            }, 1500); // Simulate delay for natural response
         }
     };
 
@@ -128,7 +151,7 @@ export function ChatInterface({
                     : "translate-x-full right-0"
             }`}
         >
-            <Card className="h-full flex flex-col text-black border-0 bg-yellow-50/70 backdrop-blur-lg shadow-lg mb-[72px]">
+            <Card className="h-full flex flex-col text-black border-0 bg-yellow-50/70 backdrop-blur-lg shadow z-10 mb-[72px]">
                 {/* Mini Agent Profile with Close Button */}
                 {currentAgent && (
                     <div className="relative">
@@ -150,7 +173,7 @@ export function ChatInterface({
 
                 {/* Chat Messages */}
                 <CardContent className="flex-1 overflow-hidden">
-                    <ScrollArea className="h-[700px] overflow-y-auto py-2 flex flex-col gap-2">
+                    <ScrollArea className="h-[700px] overflow-y-auto flex flex-col gap-2">
                         <div className="flex flex-col">
                             {chatHistory[currentAgent!]?.map((msg, index) => (
                                 <div
