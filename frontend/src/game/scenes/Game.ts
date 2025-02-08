@@ -191,7 +191,7 @@ export class Game extends Scene {
                 Math.abs(playerPos.x - agentPos.x) +
                 Math.abs(playerPos.y - agentPos.y);
 
-            if (distance === 2) {
+            if (distance === 1) {
                 EventBus.emit("agent-interaction", agent.id);
                 return;
             }
