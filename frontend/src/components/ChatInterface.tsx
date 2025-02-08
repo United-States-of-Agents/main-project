@@ -13,6 +13,17 @@ type ChatMessage =
 
 const AGENT_ADDRESS = "0x74EF2a3c2CC1446643Ab59e5b65dd86665521F1c";
 
+// Temporary hardcoded responses for agents
+const AGENT_RESPONSES: Record<string, string[]> = {
+    Marcus: ["Hello!", "How can I help?", "Nice to meet you!"],
+    Julie: ["Hey there!", "What do you need?", "I'm busy but I'll chat."],
+    Leonardo: ["Greetings!", "Need assistance?", "Always here to help."],
+    Alan: ["Hi!", "Have any questions?", "Let's talk."],
+    Sara: ["Hello there!", "Tell me something interesting.", "What's up?"],
+    Troy: ["Yo!", "What brings you here?", "Nice to see you."],
+    Linda: ["Hey!", "Hope you're having a great day!", "Let's chat!"],
+};
+
 export function ChatInterface({
     isChatting,
     currentAgent,
@@ -60,6 +71,7 @@ export function ChatInterface({
     const handleSendMessage = () => {
         if (!message.trim() || !currentAgent) return;
 
+        // Add user message to chat history
         setChatHistory((prev) => ({
             ...prev,
             [currentAgent]: [
@@ -72,6 +84,24 @@ export function ChatInterface({
             agentId: currentAgent,
             text: message,
         });
+
+        // Trigger agent response after 1.5 seconds
+        setTimeout(() => {
+            const agentResponse =
+                AGENT_RESPONSES[currentAgent]?.[
+                    Math.floor(
+                        Math.random() * AGENT_RESPONSES[currentAgent].length
+                    )
+                ] || "I don't have much to say right now.";
+
+            setChatHistory((prev) => ({
+                ...prev,
+                [currentAgent]: [
+                    ...(prev[currentAgent] || []),
+                    { sender: "agent", text: agentResponse },
+                ],
+            }));
+        }, 1500);
 
         setMessage("");
     };
