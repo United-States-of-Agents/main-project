@@ -16,6 +16,6 @@ export const config = createConfig({
         safe(),
     ],
     transports: {
-        [baseSepolia.id]: http(),
+        [baseSepolia.id]: http("https://base-sepolia.g.alchemy.com/v2/CIy2ezuBM2p9iHPNXw1jN_SMRelF4Gmq"),
     },
 });
