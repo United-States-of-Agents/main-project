@@ -1,14 +1,13 @@
+"use client";
+
 import { useRef, useState, useEffect } from "react";
-import { IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
+import { type IRefPhaserGame, PhaserGame } from "./game/PhaserGame";
 import { ChatInterface } from "./components/ChatInterface";
 import { EventBus } from "./game/EventBus";
-
-import {
-    WalletOptions,
-    ConnectButton,
-} from "@/components/connection/ConnectWallet";
+import { ConnectButton } from "@/components/connection/ConnectWallet";
 import Provider from "@/components/connection/WagmiProvider";
 import UserProfile from "@/components/UserProfile";
+import { ControlGuide } from "./components/ControlGuide";
 
 function App() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
@@ -50,6 +49,7 @@ function App() {
         <Provider>
             <div id="app" className="relative w-full h-screen">
                 <PhaserGame ref={phaserRef} />
+                <ControlGuide />
                 <ChatInterface
                     isChatting={isChatting}
                     currentAgent={currentAgent}
