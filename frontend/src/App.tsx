@@ -59,7 +59,7 @@ function App() {
                 <ConnectButton />
 
                 {/* #TODO: Web3 Connections For Navbar Here */}
-                <div className="w-screen/2 h-screen bg-black mt-20">
+                <div className="fixed top-40 left-2 mt-20">
                     <AcceptTask />
                     <PayAgent />
                     <CreateAgent />

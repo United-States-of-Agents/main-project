@@ -29,21 +29,16 @@ export function ConnectButton() {
 
     return (
         <div className="fixed top-2 right-2">
-            {address ? (
-                <Button
-                    className="w-full bg-white text-lg text-black rounded-lg"
-                    onClick={() => disconnect()}
-                >
-                    Disconnect
-                </Button>
-            ) : (
-                <Button
-                    className="w-full bg-white text-lg text-black rounded-lg my-2"
-                    onClick={() => connect({ connector: connectors[1] })}
-                >
-                    Connect Wallet
-                </Button>
-            )}
+            <Button
+                className="w-full bg-yellow-50/70 text-lg text-black cursor-pointer rounded-full backdrop-blur-md shadow"
+                onClick={() =>
+                    address
+                        ? disconnect()
+                        : connect({ connector: connectors[1] })
+                }
+            >
+                {address ? "Disconnect" : "Connect Wallet"}
+            </Button>
         </div>
     );
 }
