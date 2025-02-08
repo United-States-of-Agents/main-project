@@ -172,8 +172,9 @@ export function ChatInterface({
                 )}
 
                 {/* Chat Messages */}
-                <CardContent className="flex-1 overflow-hidden">
-                    <ScrollArea className="h-[700px] overflow-y-auto flex flex-col gap-2">
+                <CardContent className="flex-1 py-0 px-6 overflow-hidden">
+                    {/* Currently hardcoded the height*/}
+                    <ScrollArea className="h-[72vh] overflow-y-auto flex flex-col gap-2">
                         <div className="flex flex-col">
                             {chatHistory[currentAgent!]?.map((msg, index) => (
                                 <div
