@@ -5,8 +5,11 @@ import GridEngine, { Direction } from "grid-engine";
 export class Game extends Scene {
     gridEngine!: GridEngine;
     interactionKey!: Phaser.Input.Keyboard.Key;
+    shiftKey!: Phaser.Input.Keyboard.Key;
     agentContainers: Record<string, Phaser.GameObjects.Container> = {};
     isChatting = false;
+    normalSpeed = 6; // Default movement speed
+    sprintSpeed = 10; // Sprinting speed
 
     constructor() {
         super("Game");
@@ -88,9 +91,10 @@ export class Game extends Scene {
                 {
                     id: "player",
                     sprite: playerSprite,
+                    container: playerContainer,
                     walkingAnimationMapping: 6,
                     startPosition: { x: 56, y: 13 },
-                    container: playerContainer,
+                    speed: this.normalSpeed,
                 },
                 ...agents.map((agent, i) => ({
                     id: agent.id,
@@ -105,10 +109,16 @@ export class Game extends Scene {
         };
 
         this.gridEngine.create(map, gridEngineConfig);
+
+        // Keyboard input
         this.interactionKey = this.input.keyboard!.addKey(
             Phaser.Input.Keyboard.KeyCodes.E
         );
+        this.shiftKey = this.input.keyboard!.addKey(
+            Phaser.Input.Keyboard.KeyCodes.SHIFT
+        );
 
+        // Event listeners
         this.events.on("agent-message", ({ agentId, text }) => {
             const agentContainer = this.agentContainers[agentId];
             if (!agentContainer) return;
@@ -141,6 +151,11 @@ export class Game extends Scene {
 
     update() {
         if (this.isChatting) return; // Prevent movement during chat
+
+        const speed = this.shiftKey.isDown
+            ? this.sprintSpeed
+            : this.normalSpeed;
+        this.gridEngine.setSpeed("player", speed);
 
         const cursors = this.input.keyboard!.createCursorKeys();
         if (cursors.left.isDown) {
