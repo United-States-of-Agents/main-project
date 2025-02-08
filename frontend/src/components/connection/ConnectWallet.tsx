@@ -31,7 +31,7 @@ export function ConnectButton() {
         <div className="fixed top-2 right-2">
             {address ? (
                 <Button
-                    className="w-full bg-white text-lg text-black rounded-lg my-2"
+                    className="w-full bg-white text-lg text-black rounded-lg"
                     onClick={() => disconnect()}
                 >
                     Disconnect

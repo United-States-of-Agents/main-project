@@ -80,11 +80,13 @@ export function ChatInterface({
 
     return (
         <div
-            className={`fixed right-0 top-0 h-full w-96 bg-yellow-50/70 backdrop-blur-lg shadow-lg flex flex-col transition-transform ${
-                isChatting ? "translate-x-0" : "translate-x-full"
+            className={`fixed top-14 h-full w-md flex flex-col transition-transform ${
+                isChatting
+                    ? "translate-x-0 right-2"
+                    : "translate-x-full right-0"
             }`}
         >
-            <Card className="h-full flex flex-col text-black border-0">
+            <Card className="h-full flex flex-col text-black border-0 bg-yellow-50/70 backdrop-blur-lg shadow-lg mb-16">
                 <CardHeader className="flex flex-row items-center justify-between">
                     <Button
                         variant="ghost"
