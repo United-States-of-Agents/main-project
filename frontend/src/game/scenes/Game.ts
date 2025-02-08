@@ -193,7 +193,12 @@ export class Game extends Scene {
                 Math.abs(playerPos.y - agentPos.y);
 
             if (distance === 1) {
+                // Ensure game knows a chat is starting
+                this.isChatting = true;
+
+                // Emit event with agent info
                 EventBus.emit("agent-interaction", agent.id);
+
                 return;
             }
         }

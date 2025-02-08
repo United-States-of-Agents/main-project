@@ -32,7 +32,10 @@ function App() {
     const handleCloseChat = () => {
         setIsChatting(false);
 
-        // Reset the 'E' key state in Phaser
+        // Ensure Phaser knows chat is closed
+        EventBus.emit("chat-closed");
+
+        // Reset 'E' key state
         if (phaserRef.current) {
             const scene = phaserRef.current.scene;
             if (scene) {
