@@ -5,8 +5,11 @@ import GridEngine, { Direction } from "grid-engine";
 const AGENTS = [
     { id: "Marcus", position: { x: 9, y: 30 }, walkingAnimationMapping: 0 },
     { id: "Julie", position: { x: 13, y: 11 }, walkingAnimationMapping: 1 },
-    { id: "Leonardo", position: { x: 85, y: 11 }, walkingAnimationMapping: 2 },
+    { id: "Leonardo", position: { x: 85, y: 12 }, walkingAnimationMapping: 2 },
     { id: "Alan", position: { x: 87, y: 30 }, walkingAnimationMapping: 4 },
+    { id: "Sara", position: { x: 58, y: 13 }, walkingAnimationMapping: 3 },
+    { id: "Troy", position: { x: 60, y: 30 }, walkingAnimationMapping: 7 },
+    { id: "Linda", position: { x: 30, y: 23 }, walkingAnimationMapping: 5 },
 ];
 
 export class Game extends Scene {
@@ -94,7 +97,7 @@ export class Game extends Scene {
                     sprite: playerSprite,
                     container: playerContainer,
                     walkingAnimationMapping: 6,
-                    startPosition: { x: 56, y: 13 },
+                    startPosition: { x: 55, y: 13 },
                     speed: this.normalSpeed,
                 },
                 ...AGENTS.map((agent) => ({
