@@ -15,6 +15,7 @@ interface ProfileCardProps {
     data: any;
     profileType: "user" | "agent";
     infoRows: InfoRowProps[];
+    avatarImageURL?: string;
 }
 
 export function ProfileCard({
@@ -22,6 +23,7 @@ export function ProfileCard({
     data,
     profileType,
     infoRows,
+    avatarImageURL,
 }: ProfileCardProps) {
     const feedbackRow = infoRows.find(
         (row) => row.label === "Average Feedback"
@@ -40,7 +42,10 @@ export function ProfileCard({
                 <div className="flex flex-col items-center mb-4">
                     <Avatar className="w-24 h-24">
                         <AvatarImage
-                            src="/assets/default_character.png"
+                            src={
+                                avatarImageURL ||
+                                "/assets/default_character.png"
+                            }
                             alt="User profile"
                         />
                         <AvatarFallback>UN</AvatarFallback>

@@ -48,7 +48,9 @@ export function MiniAgentProfile({
             <div className="flex items-center space-x-3">
                 {/* Avatar */}
                 <Avatar className="w-12 h-12">
-                    <AvatarImage src="/assets/default_character.png" />
+                    <AvatarImage
+                        src={`/assets/${agentName.toLowerCase()}_avatar.png`}
+                    />
                     <AvatarFallback>AG</AvatarFallback>
                 </Avatar>
 
