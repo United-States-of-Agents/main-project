@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star } from "lucide-react";
 import { truncateAddress } from "@/utils/formatData";
+import type React from "react";
 
 interface InfoRowProps {
     label: string;
@@ -12,7 +13,7 @@ interface InfoRowProps {
 interface ProfileCardProps {
     address: string;
     data: any;
-    profileType: "user" | "agent"; // Determines different fields
+    profileType: "user" | "agent";
     infoRows: InfoRowProps[];
 }
 
@@ -22,36 +23,44 @@ export function ProfileCard({
     profileType,
     infoRows,
 }: ProfileCardProps) {
+    const feedbackRow = infoRows.find(
+        (row) => row.label === "Average Feedback"
+    );
+    const otherRows = infoRows.filter(
+        (row) => row.label !== "Average Feedback"
+    );
+
     return (
         <Card
             className={`fixed ${
                 profileType === "user" ? "left-2 bottom-2" : "top-2 left-2"
-            } bg-yellow-50/70 backdrop-blur-md shadow-xl text-black border-0`}
+            } bg-yellow-50/70 backdrop-blur-md shadow-xl text-black border-0 w-72`}
         >
-            <CardContent className="flex p-4">
-                {/* Avatar Section */}
-                <div className="flex flex-col items-center justify-center space-y-4 pr-4 border-r border-white/50">
-                    <Avatar className="w-16 h-16">
+            <CardContent className="p-6">
+                <div className="flex flex-col items-center mb-4">
+                    <Avatar className="w-24 h-24">
                         <AvatarImage
                             src="/assets/default_character.png"
                             alt="User profile"
                         />
                         <AvatarFallback>UN</AvatarFallback>
                     </Avatar>
-                    <div className="text-sm text-muted-foreground text-center bg-gray-400 px-2 py-1 rounded-full">
+                    {feedbackRow && (
+                        <div className="flex items-center space-x-2 bg-yellow-100 rounded-full px-3 py-1 -mt-3 z-10">
+                            <Star className="w-5 h-5 text-yellow-400 fill-current" />
+                            <span className="text-lg font-bold">
+                                {feedbackRow.value}
+                            </span>
+                        </div>
+                    )}
+                    <div className="text-sm text-muted-foreground text-center bg-gray-400 px-3 py-1 rounded-full my-2">
                         <p className="font-mono">{truncateAddress(address)}</p>
                     </div>
                 </div>
 
-                {/* Dynamic Info Section */}
-                <div className="flex-grow pl-4 space-y-3">
-                    {infoRows.map((row, index) => (
-                        <InfoRow
-                            key={index}
-                            label={row.label}
-                            value={row.value}
-                            icon={row.icon}
-                        />
+                <div className="grid grid-cols-2 gap-4">
+                    {otherRows.map((row, index) => (
+                        <InfoBox key={index} {...row} />
                     ))}
                 </div>
             </CardContent>
@@ -59,10 +68,10 @@ export function ProfileCard({
     );
 }
 
-export function InfoRow({ label, value, icon }: InfoRowProps) {
+function InfoBox({ label, value, icon }: InfoRowProps) {
     return (
-        <div className="flex justify-between items-center gap-3">
-            <span className="text-sm font-medium">{label}</span>
+        <div className="bg-white/50 rounded-lg p-3 flex flex-col items-center justify-center">
+            <div className="text-xs font-medium mb-1 truncate">{label}</div>
             <div className="flex items-center space-x-1">
                 {icon}
                 <span className="text-lg font-bold">{value}</span>

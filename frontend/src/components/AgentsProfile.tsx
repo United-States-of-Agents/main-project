@@ -1,7 +1,7 @@
 import { useReadContract } from "wagmi";
 import { ProfileCard } from "./ProfileCard";
 import { networkStateContractConfig } from "@/utils/wagmiContractConfig";
-import { Star } from "lucide-react";
+import { Star, CheckSquare, TrendingUp, Award } from "lucide-react";
 import Balance from "@/components/display/Balance";
 import {
     TaskCompleted,
@@ -11,7 +11,6 @@ import {
 } from "@/components/display/AgentInfo";
 import { TokenLogo } from "./ProfileCard";
 
-// Default agent address
 const agentAddress = "0x74EF2a3c2CC1446643Ab59e5b65dd86665521F1c";
 
 export default function AgentsProfile() {
@@ -31,11 +30,6 @@ export default function AgentsProfile() {
             profileType="agent"
             infoRows={[
                 {
-                    label: "Token Balance",
-                    value: <Balance address={agentAddress} />,
-                    icon: <TokenLogo />,
-                },
-                {
                     label: "Average Feedback",
                     value: <AverageFeedback data={data} />,
                     icon: (
@@ -43,18 +37,24 @@ export default function AgentsProfile() {
                     ),
                 },
                 {
+                    label: "Token Balance",
+                    value: <Balance address={agentAddress} />,
+                    icon: <TokenLogo />,
+                },
+                {
                     label: "Tasks Completed",
                     value: <TaskCompleted data={data} />,
+                    icon: <CheckSquare className="w-5 h-5 text-green-500" />,
                 },
                 {
                     label: "Total Spent",
                     value: <TotalSpend data={data} />,
-                    icon: <TokenLogo />,
+                    icon: <TrendingUp className="w-5 h-5 text-red-500" />,
                 },
                 {
                     label: "Total Earned",
                     value: <TotalEarned data={data} />,
-                    icon: <TokenLogo />,
+                    icon: <Award className="w-5 h-5 text-purple-500" />,
                 },
             ]}
         />
