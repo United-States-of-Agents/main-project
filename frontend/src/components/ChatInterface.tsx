@@ -1,77 +1,61 @@
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { EventBus } from "../game/EventBus";
 import { SendHorizonal, X } from "lucide-react";
 import { MiniAgentProfile } from "./MiniAgentProfile";
 
-const agentAddress = "0x74EF2a3c2CC1446643Ab59e5b65dd86665521F1c";
+type ChatMessage =
+    | { sender: "user"; text: string }
+    | { sender: "agent"; text: string };
 
-type ChatMessage = { sender: "user" | "agent"; text: string };
+const AGENT_ADDRESS = "0x74EF2a3c2CC1446643Ab59e5b65dd86665521F1c";
 
 export function ChatInterface({
     isChatting,
+    currentAgent,
     onClose,
 }: {
     isChatting: boolean;
+    currentAgent: string | null;
     onClose: () => void;
 }) {
     const [chatHistory, setChatHistory] = useState<
         Record<string, ChatMessage[]>
     >({});
     const [message, setMessage] = useState("");
-    const [currentAgent, setCurrentAgent] = useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        EventBus.on("agent-interaction", (agentId: string) => {
-            setCurrentAgent(agentId);
+        if (isChatting && currentAgent) {
             setChatHistory((prev) => ({
                 ...prev,
-                [agentId]: prev[agentId] || [],
+                [currentAgent]: prev[currentAgent] || [],
             }));
 
             setTimeout(() => {
                 inputRef.current?.focus();
             }, 100);
-        });
-
-        EventBus.on(
-            "agent-message",
-            ({ agentId, text }: { agentId: string; text: string }) => {
-                setChatHistory((prev) => ({
-                    ...prev,
-                    [agentId]: [
-                        ...(prev[agentId] || []),
-                        { sender: "agent", text },
-                    ],
-                }));
-            }
-        );
-
-        return () => {
-            EventBus.off("agent-interaction");
-            EventBus.off("agent-message");
-        };
-    }, []);
+        }
+    }, [isChatting, currentAgent]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [chatHistory]);
 
     useEffect(() => {
-        // Listen for Escape key to close chat
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
-                handleCloseChat();
+                onClose();
             }
         };
+
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, []);
+    }, [onClose]);
 
     const handleSendMessage = () => {
         if (!message.trim() || !currentAgent) return;
@@ -88,13 +72,8 @@ export function ChatInterface({
             agentId: currentAgent,
             text: message,
         });
-        setMessage("");
-    };
 
-    const handleCloseChat = () => {
-        setCurrentAgent(null);
-        onClose();
-        EventBus.emit("chat-closed");
+        setMessage("");
     };
 
     return (
@@ -106,33 +85,31 @@ export function ChatInterface({
             }`}
         >
             <Card className="h-full flex flex-col text-black border-0 bg-yellow-50/70 backdrop-blur-lg shadow-lg mb-16">
-                {/* Header with Close Button */}
-                <CardHeader className="flex items-center justify-between p-3">
-                    <span className="text-lg font-semibold">Chat</span>
-                    <Button
-                        variant="ghost"
-                        onClick={handleCloseChat}
-                        className="text-xl cursor-pointer"
-                    >
-                        <X />
-                    </Button>
-                </CardHeader>
-
-                {/* Mini Agent Profile */}
+                {/* Mini Agent Profile with Close Button */}
                 {currentAgent && (
-                    <MiniAgentProfile
-                        agentName={currentAgent}
-                        agentAddress={agentAddress}
-                    />
+                    <div className="relative">
+                        <MiniAgentProfile
+                            agentName={currentAgent}
+                            agentAddress={AGENT_ADDRESS}
+                        />
+                        <Button
+                            variant="ghost"
+                            onClick={onClose}
+                            className="absolute top-2 right-2 p-1 text-gray-700 hover:text-black"
+                        >
+                            <X className="scale-120" />
+                        </Button>
+                    </div>
                 )}
 
+                {/* Chat Messages */}
                 <CardContent className="flex-1 overflow-hidden">
                     <ScrollArea className="h-[400px] overflow-y-auto py-2 flex flex-col gap-2">
                         <div className="flex flex-col">
                             {chatHistory[currentAgent!]?.map((msg, index) => (
                                 <div
                                     key={index}
-                                    className={`mx-1 p-2 px-3 rounded-2xl shadow-xs max-w-[75%] my-2 bg-white/95 text-zinc-700 border-0  ${
+                                    className={`mx-1 p-2 px-3 rounded-2xl shadow-xs max-w-[75%] my-2 bg-white/95 text-zinc-700 border-0 ${
                                         msg.sender === "user"
                                             ? "shadow-blue-700 self-end text-right"
                                             : "shadow-purple-600 self-start text-left"
@@ -145,6 +122,8 @@ export function ChatInterface({
                         <div ref={messagesEndRef} />
                     </ScrollArea>
                 </CardContent>
+
+                {/* Message Input */}
                 <div className="p-3 flex gap-2 text-black">
                     <Input
                         ref={inputRef}

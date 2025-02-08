@@ -26,7 +26,6 @@ export function MiniAgentProfile({
     };
 
     const { data } = useReadContract(contractConfig);
-    if (!data) return null;
 
     return (
         <div className="flex flex-col p-3 bg-yellow-100 rounded-t-md shadow-md">
@@ -49,7 +48,7 @@ export function MiniAgentProfile({
                 </div>
 
                 {/* Rating */}
-                <div className="flex items-center text-yellow-500 space-x-1">
+                <div className="flex items-center text-yellow-500 space-x-1 mr-8">
                     <Star className="w-5 h-5" />
                     <span className="text-lg font-bold">
                         <AverageFeedback data={data} />

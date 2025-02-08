@@ -9,28 +9,28 @@ import {
 } from "@/components/connection/ConnectWallet";
 import Provider from "@/components/connection/WagmiProvider";
 import UserProfile from "@/components/UserProfile";
-import AgentsProfile from "@/components/AgentsProfile";
-import PayAgent from "@/components/agents/PayAgent";
-import CreateAgent from "@/components/agents/CreateAgent";
-import AcceptTask from "@/components/agents/AcceptTask";
-import AddReview from "@/components/agents/AddReview";
 
 function App() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
     const [isChatting, setIsChatting] = useState(false);
+    const [currentAgent, setCurrentAgent] = useState<string | null>(null);
 
     useEffect(() => {
-        EventBus.on("agent-interaction", () => {
+        const handleAgentInteraction = (agentId: string) => {
+            setCurrentAgent(agentId);
             setIsChatting(true);
-        });
+        };
+
+        EventBus.on("agent-interaction", handleAgentInteraction);
 
         return () => {
-            EventBus.off("agent-interaction");
+            EventBus.off("agent-interaction", handleAgentInteraction);
         };
     }, []);
 
     const handleCloseChat = () => {
         setIsChatting(false);
+        setCurrentAgent(null);
 
         // Ensure Phaser knows chat is closed
         EventBus.emit("chat-closed");
@@ -52,18 +52,11 @@ function App() {
                 <PhaserGame ref={phaserRef} />
                 <ChatInterface
                     isChatting={isChatting}
+                    currentAgent={currentAgent}
                     onClose={handleCloseChat}
                 />
                 <UserProfile />
                 <ConnectButton />
-
-                {/* #TODO: Web3 Connections For Navbar Here */}
-                {/* <div className="fixed top-40 left-2 mt-20">
-                    <AcceptTask />
-                    <PayAgent />
-                    <CreateAgent />
-                    <AddReview />
-                </div> */}
             </div>
         </Provider>
     );
