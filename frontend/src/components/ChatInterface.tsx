@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { EventBus } from "../game/EventBus";
-import { Send, SendHorizonal } from "lucide-react";
+import { SendHorizonal, X } from "lucide-react";
+import { MiniAgentProfile } from "./MiniAgentProfile";
 
-interface ChatMessage {
-    sender: "user" | "agent";
-    text: string;
-}
+const agentAddress = "0x74EF2a3c2CC1446643Ab59e5b65dd86665521F1c";
+
+type ChatMessage = { sender: "user" | "agent"; text: string };
 
 export function ChatInterface({
     isChatting,
@@ -39,15 +39,18 @@ export function ChatInterface({
             }, 100);
         });
 
-        EventBus.on("agent-message", ({ agentId, text }) => {
-            setChatHistory((prev) => ({
-                ...prev,
-                [agentId]: [
-                    ...(prev[agentId] || []),
-                    { sender: "agent", text },
-                ],
-            }));
-        });
+        EventBus.on(
+            "agent-message",
+            ({ agentId, text }: { agentId: string; text: string }) => {
+                setChatHistory((prev) => ({
+                    ...prev,
+                    [agentId]: [
+                        ...(prev[agentId] || []),
+                        { sender: "agent", text },
+                    ],
+                }));
+            }
+        );
 
         return () => {
             EventBus.off("agent-interaction");
@@ -58,6 +61,17 @@ export function ChatInterface({
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [chatHistory]);
+
+    useEffect(() => {
+        // Listen for Escape key to close chat
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                handleCloseChat();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, []);
 
     const handleSendMessage = () => {
         if (!message.trim() || !currentAgent) return;
@@ -74,8 +88,13 @@ export function ChatInterface({
             agentId: currentAgent,
             text: message,
         });
-
         setMessage("");
+    };
+
+    const handleCloseChat = () => {
+        setCurrentAgent(null);
+        onClose();
+        EventBus.emit("chat-closed");
     };
 
     return (
@@ -87,19 +106,26 @@ export function ChatInterface({
             }`}
         >
             <Card className="h-full flex flex-col text-black border-0 bg-yellow-50/70 backdrop-blur-lg shadow-lg mb-16">
-                <CardHeader className="flex flex-row items-center justify-between">
+                {/* Header with Close Button */}
+                <CardHeader className="flex items-center justify-between p-3">
+                    <span className="text-lg font-semibold">Chat</span>
                     <Button
                         variant="ghost"
-                        onClick={() => {
-                            onClose();
-                            EventBus.emit("chat-closed");
-                        }}
+                        onClick={handleCloseChat}
                         className="text-xl cursor-pointer"
                     >
-                        ✖
+                        <X />
                     </Button>
-                    <CardTitle>{currentAgent}</CardTitle>
                 </CardHeader>
+
+                {/* Mini Agent Profile */}
+                {currentAgent && (
+                    <MiniAgentProfile
+                        agentName={currentAgent}
+                        agentAddress={agentAddress}
+                    />
+                )}
+
                 <CardContent className="flex-1 overflow-hidden">
                     <ScrollArea className="h-[400px] overflow-y-auto py-2 flex flex-col gap-2">
                         <div className="flex flex-col">

@@ -55,7 +55,6 @@ function App() {
                     onClose={handleCloseChat}
                 />
                 <UserProfile />
-                <AgentsProfile />
                 <ConnectButton />
 
                 {/* #TODO: Web3 Connections For Navbar Here */}
