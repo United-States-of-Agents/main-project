@@ -5,6 +5,9 @@ import { EventBus } from "./game/EventBus";
 
 import {WalletOptions, ConnectButton} from '@/components/connection/ConnectWallet';
 import Provider from '@/components/connection/WagmiProvider';
+import UserProfile from "@/components/UserProfile";
+import PayAgent from "@/components/agents/PayAgent";
+import CreateAgent from "@/components/agents/CreateAgent";
 
 function App() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
@@ -45,6 +48,9 @@ function App() {
                     Hello Motherfucker
                     <WalletOptions/>
                     <ConnectButton/>
+                    <UserProfile />
+                    <PayAgent/>
+                    <CreateAgent/>
                 </div>
             </div>
         </Provider>
