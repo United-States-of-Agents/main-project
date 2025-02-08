@@ -2,6 +2,7 @@
 export function csvToList(csv: string): (string | number)[] {
     if (typeof csv !== 'string') {
         return [0,0,0]
+        //throw new Error('csvToList expects a string');
     }
     return csv.split(',').map(value => {
         // Trim whitespace and check if it's a number

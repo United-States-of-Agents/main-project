@@ -1,8 +1,7 @@
 import { useReadContract, useAccount } from 'wagmi'
 import { tokenContractConfig } from '@/utils/wagmiContractConfig';
 
-export default function PayAgent(){
-    const {address} = useAccount();
+export default function Balance({address}: {address: string}){
     const contractConfig = {
         ...tokenContractConfig,
         functionName: 'balanceOf',

@@ -6,8 +6,11 @@ import { EventBus } from "./game/EventBus";
 import {WalletOptions, ConnectButton} from '@/components/connection/ConnectWallet';
 import Provider from '@/components/connection/WagmiProvider';
 import UserProfile from "@/components/UserProfile";
+import AgentsProfile from "@/components/AgentsProfile";
 import PayAgent from "@/components/agents/PayAgent";
 import CreateAgent from "@/components/agents/CreateAgent";
+import AcceptTask from "@/components/agents/AcceptTask";
+import AddReview from "@/components/agents/AddReview";
 
 function App() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
@@ -45,12 +48,13 @@ function App() {
                 
                 {/* #TODO: Web3 Connections For Navbar Here */}
                 <div className="w-screen h-screen bg-black">
-                    Hello Motherfucker
-                    <WalletOptions/>
                     <ConnectButton/>
                     <UserProfile />
+                    <AgentsProfile/>
+                    <AcceptTask />
                     <PayAgent/>
                     <CreateAgent/>
+                    <AddReview/>
                 </div>
             </div>
         </Provider>

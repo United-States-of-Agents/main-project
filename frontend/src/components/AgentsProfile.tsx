@@ -9,14 +9,17 @@ import { Star } from "lucide-react"
 
 import Balance from '@/components/display/Balance';
 import { UserAverageFeedback, UserSpending } from '@/components/display/UserInfo';
+import { TaskCompleted, TotalSpend, TotalEarned, AverageFeedback} from '@/components/display/AgentInfo';
 import { csvToList, truncateAddress, formatNumber} from '@/utils/formatData';
 
-export default function UserProfile(){
-    const {address} = useAccount();
+// DEFAULT AGENT ADDRESS
+const address = '0x74EF2a3c2CC1446643Ab59e5b65dd86665521F1c';
+
+export default function AgentsProfile(){
     const contractConfig = {
         ...networkStateContractConfig,
-        functionName: 'users',
-        args: [address], // Replace with the wallet address you want to query
+        functionName: 'agents',
+        args: [address], 
     }
     const {data, error, isPending} = useReadContract(contractConfig);
 
@@ -32,7 +35,7 @@ export default function UserProfile(){
     }
 
     return(
-        <>{data && <Card className="w-[500px] max-w-4xl bg-white shadow-lg text-black">
+        <>{data && <Card className="w-[700px] max-w-4xl bg-white shadow-lg text-black">
             <CardContent className="flex p-6">
                 <div className="flex flex-col items-center space-y-4 pr-6 border-r border-gray-200">
                     <Avatar className="w-32 h-32">
@@ -41,7 +44,7 @@ export default function UserProfile(){
                     </Avatar>
                     <div className="text-sm text-muted-foreground text-center">
                         <p className="font-medium">Wallet Address</p>
-                        {/*<p>{data?.toString()}</p>*/}
+                        <p>{data?.toString()}</p>
                         <p className="font-mono">{truncateAddress(address?address:"")}</p>
                     </div>
                 </div>
@@ -49,11 +52,13 @@ export default function UserProfile(){
                     <InfoRow label="Token Balance" value={<Balance address={address}/>} icon={<TokenLogo />} />
                     <InfoRow
                         label="Average Feedback"
-                        value={data? <UserAverageFeedback data={data}/>: "123"}
+                        value={data? <AverageFeedback data={data}/>: "Not Found"}
                         icon={<Star className="w-5 h-5 text-yellow-400 fill-current" />}
                     />
+                    <InfoRow label="Tasks Completed " value={data? <TaskCompleted data={data} />: "Not Found"} icon={<></>} />
                     {/*<InfoRow label="Total Spent Tokens" value={data? `${formatNumber(Number(getUserData(data)[2]) / 10**18, 2)} - ${getUserData(data)}` : "0.00"} icon={<TokenLogo />} />*/}
-                    <InfoRow label="Total Spent Tokens" value={data? <UserSpending data={data} />: "Not Found"} icon={<TokenLogo />} />
+                    <InfoRow label="Total Spent " value={data? <TotalSpend data={data} />: "Not Found"} icon={<TokenLogo />} />
+                    <InfoRow label="Total Earned " value={data? <TotalEarned data={data} />: "Not Found"} icon={<TokenLogo />} />
                 </div>
             </CardContent>
         </Card>}</>);

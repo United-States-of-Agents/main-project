@@ -3,7 +3,7 @@ import { networkStateContractConfig, tokenContractConfig } from '@/utils/wagmiCo
 import { useState } from 'react';
 
 
-export default function AcceptTask(){
+export default function AddReview(){
     const {address} = useAccount();
     const allowanceConfig = {
         ...tokenContractConfig,
@@ -16,16 +16,16 @@ export default function AcceptTask(){
 
     const [amount, setAmount] = useState(10*10**18);
 
-    async function acceptTask(){
+    async function reviewTask(){
         writeContract({
             ...networkStateContractConfig,
-            functionName: 'acceptTask',
-            args: [1],
+            functionName: 'reviewTask',
+            args: [1, 9],
         })
     }
 
     return <div className="bg-gray-500 w-full h-32 tex-black rounded-lg my-2">
-        <button className="text-black" onClick={()=>{acceptTask()}}>Accept Task</button> :
+        <button className="text-black" onClick={()=>{reviewTask()}}>Add Review</button> :
         
         {paymentPending && "Confirming Tx"}
         {error && `Error: ${error.message}`}
