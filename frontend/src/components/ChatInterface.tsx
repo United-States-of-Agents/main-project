@@ -17,7 +17,6 @@ const AGENT_RESPONSES: Record<string, string[]> = {
     Julie: ["Hey there!", "What do you need?", "I'm busy but I'll chat."],
     Leonardo: ["Greetings!", "Need assistance?", "Always here to help."],
     Alan: ["Hi!", "Have any questions?", "Let's talk."],
-    Sara: ["Hello there!", "Tell me something interesting.", "What's up?"],
     Troy: ["Yo!", "What brings you here?", "Nice to see you."],
     Linda: ["Hey!", "Hope you're having a great day!", "Let's chat!"],
 };
@@ -66,7 +65,7 @@ export function ChatInterface({
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [onClose]);
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (!message.trim() || !currentAgent) return;
 
         setChatHistory((prev) => ({
@@ -95,28 +94,30 @@ export function ChatInterface({
             }));
         }, 500);
 
-        // Agent response after 2 seconds
-        setTimeout(() => {
-            const agentResponse =
-                AGENT_RESPONSES[currentAgent]?.[
-                    Math.floor(
-                        Math.random() * AGENT_RESPONSES[currentAgent].length
-                    )
-                ] || "I don't have much to say right now.";
-
-            setChatHistory((prev) => {
-                const newMessages = prev[currentAgent] || [];
-
-                // Remove the typing animation before adding the response
-                return {
-                    ...prev,
-                    [currentAgent]: [
-                        ...newMessages.filter((msg) => msg.sender !== "typing"),
-                        { sender: "agent", text: agentResponse },
-                    ],
-                };
+        try {
+            const response = await fetch("/api/agent-response", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    agentName: currentAgent,
+                    userMessage: message,
+                }),
             });
-        }, 2000);
+
+            const data = await response.json();
+
+            setChatHistory((prev) => ({
+                ...prev,
+                [currentAgent]: [
+                    ...(prev[currentAgent] || []).filter(
+                        (msg) => msg.sender !== "typing"
+                    ),
+                    { sender: "agent", text: data.response },
+                ],
+            }));
+        } catch (error) {
+            console.error("Error fetching agent response:", error);
+        }
     };
 
     return (
