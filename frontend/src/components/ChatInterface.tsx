@@ -15,6 +15,18 @@ import {
 } from "@/components/ui/select";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { useReadContract, useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { networkStateContractConfig, tokenContractConfig } from '@/utils/wagmiContractConfig';
+import {Web3} from 'web3';
+import NetworkState from '@/utils/NetworkState.json';
+import USA from '@/utils/USA.json';
+
+const web3 = new Web3('https://base-sepolia.g.alchemy.com/v2/CIy2ezuBM2p9iHPNXw1jN_SMRelF4Gmq');
+const abi = NetworkState.abi;
+const networkState = new web3.eth.Contract(abi, '0x04A951420393160617BfBF0017464E256d4C4468');
+const token = new web3.eth.Contract(USA.abi, '0x2EF308295579A58E1B95cD045B7af2f9ec7931f8');
+
+const DEFAULT_AGENT_ADDRESS = '0x13CA33C2F70145A960E030ef32509cA49702538d';
 
 type ChatMessage =
     | { sender: "user"; text: string }
@@ -49,6 +61,22 @@ export function ChatInterface({
     const inputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
+    const {address} = useAccount();
+    const allowanceConfig = {
+        ...tokenContractConfig,
+        functionName: 'allowance',
+        args: [address, '0x04A951420393160617BfBF0017464E256d4C4468'], // Replace with the wallet address you want to query
+    }
+    const {data: allowance} = useReadContract(allowanceConfig as any);
+    const { data: approvalHash, writeContract: approveToken} = useWriteContract();
+    const { data: hash, error, isPending: paymentPending, writeContract} = useWriteContract();
+    
+    useEffect(()=>{
+        async function checkAllowance(){
+
+        }
+    }, [])
+
     useEffect(() => {
         if (isChatting && currentAgent) {
             setChatHistory((prev) => ({
@@ -79,7 +107,6 @@ export function ChatInterface({
 
     const handleSendMessage = async () => {
         if (!message.trim() || !currentAgent) return;
-
         setChatHistory((prev) => ({
             ...prev,
             [currentAgent]: [
@@ -165,6 +192,31 @@ export function ChatInterface({
         }
     };
 
+    const requestMessageSend = async () => {
+        if(!address){alert("Wallet Not Connected");return;}
+
+        // Confirm Tipping Transaction
+        const tip = tipAmount? tipAmount : 0;
+        if(tip > 0){
+            if(parseInt(allowance? allowance.toString() : '0') < tip*10**18){
+                await approveToken({
+                    ...tokenContractConfig,
+                    functionName: 'approve',
+                    args: ['0x04A951420393160617BfBF0017464E256d4C4468', tip*5*10**18],
+                })
+            }else{
+                await writeContract({
+                    ...networkStateContractConfig,
+                    functionName: 'payAgent',
+                    args: [DEFAULT_AGENT_ADDRESS, tip*10**18],
+                })
+                handleSendMessage();
+            }
+        }else{
+            handleSendMessage();
+        }
+    }
+
     return (
         <div
             className={`fixed top-16 h-full w-md flex flex-col transition-transform ${
@@ -231,7 +283,7 @@ export function ChatInterface({
                             onKeyDown={(e) => {
                                 e.stopPropagation();
                                 if (e.key === "Enter") {
-                                    handleSendMessage();
+                                    requestMessageSend();
                                 }
                             }}
                             onFocus={() => {
@@ -266,7 +318,7 @@ export function ChatInterface({
                         </Select>
                     </div>
                     <Button
-                        onClick={handleSendMessage}
+                        onClick={requestMessageSend}
                         variant="outline"
                         className="cursor-pointer rounded-full border-0 shadow-none text-blue-500"
                         size="icon"
