@@ -15,18 +15,34 @@ import {
 } from "@/components/ui/select";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { useReadContract, useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { networkStateContractConfig, tokenContractConfig } from '@/utils/wagmiContractConfig';
-import {Web3} from 'web3';
-import NetworkState from '@/utils/NetworkState.json';
-import USA from '@/utils/USA.json';
+import {
+    useReadContract,
+    useAccount,
+    useWriteContract,
+    useWaitForTransactionReceipt,
+} from "wagmi";
+import {
+    networkStateContractConfig,
+    tokenContractConfig,
+} from "@/utils/wagmiContractConfig";
+import { Web3 } from "web3";
+import NetworkState from "@/utils/NetworkState.json";
+import USA from "@/utils/USA.json";
 
-const web3 = new Web3('https://base-sepolia.g.alchemy.com/v2/CIy2ezuBM2p9iHPNXw1jN_SMRelF4Gmq');
+const web3 = new Web3(
+    "https://base-sepolia.g.alchemy.com/v2/CIy2ezuBM2p9iHPNXw1jN_SMRelF4Gmq"
+);
 const abi = NetworkState.abi;
-const networkState = new web3.eth.Contract(abi, '0x04A951420393160617BfBF0017464E256d4C4468');
-const token = new web3.eth.Contract(USA.abi, '0x2EF308295579A58E1B95cD045B7af2f9ec7931f8');
+const networkState = new web3.eth.Contract(
+    abi,
+    "0x04A951420393160617BfBF0017464E256d4C4468"
+);
+const token = new web3.eth.Contract(
+    USA.abi,
+    "0x2EF308295579A58E1B95cD045B7af2f9ec7931f8"
+);
 
-const DEFAULT_AGENT_ADDRESS = '0x13CA33C2F70145A960E030ef32509cA49702538d';
+const DEFAULT_AGENT_ADDRESS = "0x13CA33C2F70145A960E030ef32509cA49702538d";
 
 type ChatMessage =
     | { sender: "user"; text: string }
@@ -40,6 +56,23 @@ const AGENT_RESPONSES: Record<string, string[]> = {
     Alan: ["Hi!", "Have any questions?", "Let's talk."],
     Troy: ["Yo!", "What brings you here?", "Nice to see you."],
     Linda: ["Hey!", "Hope you're having a great day!", "Let's chat!"],
+};
+
+type AgentData = {
+    [key: string]: {
+        url: string;
+        address?: string;
+    };
+};
+
+const agentData: AgentData = {
+    Sara: {
+        url: "/api/travelling-salesman",
+    },
+    Leonardo: {
+        url: `/api/coinbase-agents/twitterAnalysisAgent/agent`,
+        address: "0x13CA33C2F70145A960E030ef32509cA49702538d",
+    },
 };
 
 const TIP_AMOUNTS = [1, 5, 10, 25, 50, 75, 100];
@@ -61,26 +94,26 @@ export function ChatInterface({
     const inputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const {address} = useAccount();
+    const { address } = useAccount();
     const allowanceConfig = {
         ...tokenContractConfig,
-        functionName: 'allowance',
-        args: [address, '0x04A951420393160617BfBF0017464E256d4C4468'], // Replace with the wallet address you want to query
-    }
-    const {data: allowance} = useReadContract(allowanceConfig as any);
-    const { writeContract: approveToken} = useWriteContract();
-    const { writeContract} = useWriteContract();
+        functionName: "allowance",
+        args: [address, "0x04A951420393160617BfBF0017464E256d4C4468"],
+    };
+    const { data: allowance } = useReadContract(allowanceConfig as any);
+    const { writeContract: approveToken } = useWriteContract();
+    const { writeContract } = useWriteContract();
 
-    async function getTaskId(){
-        const taskId:number = await networkState.methods.requestCounter().call();
+    async function getTaskId() {
+        const taskId: number = await networkState.methods
+            .requestCounter()
+            .call();
         return taskId;
     }
-    
-    useEffect(()=>{
-        async function checkAllowance(){
 
-        }
-    }, [])
+    useEffect(() => {
+        async function checkAllowance() {}
+    }, []);
 
     useEffect(() => {
         if (isChatting && currentAgent) {
@@ -139,10 +172,11 @@ export function ChatInterface({
             }));
         }, 500);
 
-        // If chatting with Sara, use OpenAI API
-        if (currentAgent === "Sara") {
+        // Fetch response from agent
+        if (agentData[currentAgent]) {
             try {
-                const response = await fetch("/api/agent-response", {
+                console.log("here");
+                const response = await fetch(agentData[currentAgent].url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -175,7 +209,7 @@ export function ChatInterface({
                 console.error(error);
             }
         } else {
-            // For other agents, use predefined responses
+            // For other agents without API, use hardcoded responses
             const fallbackResponse =
                 AGENT_RESPONSES[currentAgent]?.[
                     Math.floor(
@@ -198,29 +232,38 @@ export function ChatInterface({
     };
 
     const requestMessageSend = async () => {
-        if(!address){alert("Wallet Not Connected");return;}
+        if (!address) {
+            alert("Wallet Not Connected");
+            return;
+        }
 
         // Confirm Tipping Transaction
-        const tip = tipAmount? tipAmount : 0;
-        if(tip > 0){
-            if(parseInt(allowance? allowance.toString() : '0') < tip*10**18){
+        const tip = tipAmount ? tipAmount : 0;
+        if (tip > 0) {
+            if (
+                parseInt(allowance ? allowance.toString() : "0") <
+                tip * 10 ** 18
+            ) {
                 await approveToken({
                     ...tokenContractConfig,
-                    functionName: 'approve',
-                    args: ['0x04A951420393160617BfBF0017464E256d4C4468', tip*5*10**18],
-                })
-            }else{
+                    functionName: "approve",
+                    args: [
+                        "0x04A951420393160617BfBF0017464E256d4C4468",
+                        tip * 5 * 10 ** 18,
+                    ],
+                });
+            } else {
                 await writeContract({
                     ...networkStateContractConfig,
-                    functionName: 'payAgent',
-                    args: [DEFAULT_AGENT_ADDRESS, tip*10**18],
-                })
+                    functionName: "payAgent",
+                    args: [DEFAULT_AGENT_ADDRESS, tip * 10 ** 18],
+                });
                 //handleSendMessage();
             }
-        }else{
+        } else {
             handleSendMessage();
         }
-    }
+    };
 
     return (
         <div
@@ -236,7 +279,10 @@ export function ChatInterface({
                     <div className="relative">
                         <MiniAgentProfile
                             agentName={currentAgent}
-                            agentAddress={DEFAULT_AGENT_ADDRESS}
+                            agentAddress={
+                                agentData[currentAgent].address ||
+                                DEFAULT_AGENT_ADDRESS
+                            }
                         />
                         <Button
                             variant="ghost"
@@ -256,7 +302,7 @@ export function ChatInterface({
                             {chatHistory[currentAgent!]?.map((msg, index) => (
                                 <div
                                     key={index}
-                                    className={`mx-1 p-2 px-3 rounded-2xl shadow-xs max-w-[75%] my-2 bg-white/95 text-zinc-700 border-0 ${
+                                    className={`mx-1 p-2 px-3 rounded-2xl shadow-xs max-w-[75%] my-2 bg-white/95 text-zinc-700 border-0 break-words ${
                                         msg.sender === "user"
                                             ? "shadow-blue-700 self-end text-right"
                                             : "shadow-purple-600 self-start text-left"
