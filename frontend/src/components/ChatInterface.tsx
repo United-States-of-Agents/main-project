@@ -4,8 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { EventBus } from "../game/EventBus";
-import { SendHorizonal, X } from "lucide-react";
+import { ChevronDown, SendHorizonal, X } from "lucide-react";
 import { MiniAgentProfile } from "./MiniAgentProfile";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 type ChatMessage =
     | { sender: "user"; text: string }
@@ -21,6 +28,8 @@ const AGENT_RESPONSES: Record<string, string[]> = {
     Linda: ["Hey!", "Hope you're having a great day!", "Let's chat!"],
 };
 
+const TIP_AMOUNTS = [1, 5, 10, 25, 50, 75, 100];
+
 export function ChatInterface({
     isChatting,
     currentAgent,
@@ -34,6 +43,7 @@ export function ChatInterface({
         Record<string, ChatMessage[]>
     >({});
     const [message, setMessage] = useState("");
+    const [tipAmount, setTipAmount] = useState<number | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -82,6 +92,7 @@ export function ChatInterface({
         });
 
         setMessage("");
+        setTipAmount(null);
 
         // Show animated "..." before response
         setTimeout(() => {
@@ -199,20 +210,45 @@ export function ChatInterface({
 
                 {/* Message Input */}
                 <div className="p-3 flex gap-2 text-black">
-                    <Input
-                        ref={inputRef}
-                        placeholder="Type a message..."
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        className="bg-white/95 border-0 shadow rounded-full focus-visible:ring-0"
-                        onKeyDown={(e) => e.stopPropagation()}
-                        onFocus={() => {
-                            EventBus.emit("disable-game-input");
-                        }}
-                        onBlur={() => {
-                            EventBus.emit("enable-game-input");
-                        }}
-                    />
+                    <div className="bg-white/95 flex-1 flex items-center gap-2 rounded-full shadow">
+                        <Input
+                            ref={inputRef}
+                            placeholder="Type a message..."
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            className="border-0 focus-visible:ring-0 shadow-none"
+                            onKeyDown={(e) => e.stopPropagation()}
+                            onFocus={() => {
+                                EventBus.emit("disable-game-input");
+                            }}
+                            onBlur={() => {
+                                EventBus.emit("enable-game-input");
+                            }}
+                        />
+                        <Select
+                            onValueChange={(value) =>
+                                setTipAmount(Number(value))
+                            }
+                        >
+                            <SelectTrigger className="w-fit bg-white/95 border-0 focus:ring-0 shadow-none rounded-full text-sm text-gray-800">
+                                <SelectValue
+                                    placeholder="Tip 💸"
+                                    className=""
+                                />
+                            </SelectTrigger>
+                            <SelectContent className="text-gray-800 mr-6 border-0 bg-yellow-200/50 backdrop-blur-lg">
+                                {TIP_AMOUNTS.map((amount) => (
+                                    <SelectItem
+                                        key={amount}
+                                        className="transition-colors hover:bg-yellow-100"
+                                        value={amount.toString()}
+                                    >
+                                        {amount}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                     <Button
                         onClick={handleSendMessage}
                         variant="outline"
