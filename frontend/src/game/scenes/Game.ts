@@ -5,8 +5,11 @@ import GridEngine, { Direction } from "grid-engine";
 const AGENTS = [
     { id: "Marcus", position: { x: 9, y: 30 }, walkingAnimationMapping: 0 },
     { id: "Julie", position: { x: 13, y: 11 }, walkingAnimationMapping: 1 },
-    { id: "Leonardo", position: { x: 85, y: 11 }, walkingAnimationMapping: 2 },
+    { id: "Leonardo", position: { x: 85, y: 12 }, walkingAnimationMapping: 2 },
     { id: "Alan", position: { x: 87, y: 30 }, walkingAnimationMapping: 4 },
+    { id: "Sara", position: { x: 58, y: 13 }, walkingAnimationMapping: 3 },
+    { id: "Troy", position: { x: 60, y: 30 }, walkingAnimationMapping: 7 },
+    { id: "Linda", position: { x: 30, y: 23 }, walkingAnimationMapping: 5 },
 ];
 
 export class Game extends Scene {
@@ -15,8 +18,9 @@ export class Game extends Scene {
     shiftKey!: Phaser.Input.Keyboard.Key;
     agentContainers: Record<string, Phaser.GameObjects.Container> = {};
     isChatting = false;
-    normalSpeed = 6; // Default movement speed
-    sprintSpeed = 10; // Sprinting speed
+    chattingAgent: string | null = null;
+    normalSpeed = 6;
+    sprintSpeed = 10;
 
     constructor() {
         super("Game");
@@ -94,7 +98,7 @@ export class Game extends Scene {
                     sprite: playerSprite,
                     container: playerContainer,
                     walkingAnimationMapping: 6,
-                    startPosition: { x: 56, y: 13 },
+                    startPosition: { x: 55, y: 13 },
                     speed: this.normalSpeed,
                 },
                 ...AGENTS.map((agent) => ({
@@ -151,6 +155,10 @@ export class Game extends Scene {
         });
 
         EventBus.on("chat-closed", () => {
+            if (this.chattingAgent) {
+                this.resumeAgentMovement(this.chattingAgent);
+                this.chattingAgent = null;
+            }
             this.isChatting = false;
         });
 
@@ -165,14 +173,27 @@ export class Game extends Scene {
             : this.normalSpeed;
         this.gridEngine.setSpeed("player", speed);
 
-        const cursors = this.input.keyboard!.createCursorKeys();
-        if (cursors.left.isDown) {
+        // WASD Controls
+        const wKey = this.input.keyboard!.addKey(
+            Phaser.Input.Keyboard.KeyCodes.W
+        );
+        const aKey = this.input.keyboard!.addKey(
+            Phaser.Input.Keyboard.KeyCodes.A
+        );
+        const sKey = this.input.keyboard!.addKey(
+            Phaser.Input.Keyboard.KeyCodes.S
+        );
+        const dKey = this.input.keyboard!.addKey(
+            Phaser.Input.Keyboard.KeyCodes.D
+        );
+
+        if (aKey.isDown) {
             this.gridEngine.move("player", Direction.LEFT);
-        } else if (cursors.right.isDown) {
+        } else if (dKey.isDown) {
             this.gridEngine.move("player", Direction.RIGHT);
-        } else if (cursors.up.isDown) {
+        } else if (wKey.isDown) {
             this.gridEngine.move("player", Direction.UP);
-        } else if (cursors.down.isDown) {
+        } else if (sKey.isDown) {
             this.gridEngine.move("player", Direction.DOWN);
         }
 
@@ -193,9 +214,22 @@ export class Game extends Scene {
                 Math.abs(playerPos.y - agentPos.y);
 
             if (distance === 1) {
+                // Ensure game knows a chat is starting
+                this.isChatting = true;
+                this.chattingAgent = agent.id;
+
+                // Stop agent movement
+                this.gridEngine.stopMovement(agent.id);
+
+                // Emit event with agent info
                 EventBus.emit("agent-interaction", agent.id);
+
                 return;
             }
         }
+    }
+
+    resumeAgentMovement(agentId: string) {
+        this.gridEngine.moveRandomly(agentId, 3000, 15);
     }
 }

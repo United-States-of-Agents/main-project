@@ -1,30 +1,36 @@
-import { useReadContract, useAccount } from 'wagmi'
-import { tokenContractConfig } from '@/utils/wagmiContractConfig';
+import { useContractReads } from "wagmi";
+import { tokenContractConfig } from "@/utils/wagmiContractConfig";
 
-export default function Balance({address}: {address: string}){
+export default function Balance({ address }: { address: string }) {
     const contractConfig = {
         ...tokenContractConfig,
-        functionName: 'balanceOf',
-        args: [address], 
+        functionName: "balanceOf",
+        args: [address],
+    };
+    const { data, error, isPending } = useContractReads({
+        contracts: [contractConfig as any],
+    });
+
+    if (isPending) {
+        return "Loading...";
     }
-    const {data, error, isPending} = useReadContract(contractConfig as any);
+    if (error) {
+        return "Not Found";
+    }
 
-    if(isPending){
-        return "Loading..."
-    };
-    if(error){
-        return `Not Found`
-    };
-    
-    //return `${data?.toString().slice(0, data.toString().length - 18)}`;
-    return formatNumber(Number(data)/10**18 as number|undefined, 2);
+    const balance = Number(data?.[0]?.result) / 10 ** 18;
+    return formatLargeNumber(balance);
 }
 
-function formatNumber(value: number | undefined, decimalPlaces = 0): string {
-    if (value === undefined) return "N/A"
-    return value.toLocaleString(undefined, {
-      minimumFractionDigits: decimalPlaces,
-      maximumFractionDigits: decimalPlaces,
-    })
+function formatLargeNumber(num: number): string {
+    if (num >= 1000000000) {
+        return (num / 1000000000).toFixed(1) + "B";
+    }
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + "M";
+    }
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1) + "K";
+    }
+    return num.toFixed(0);
 }
-  
