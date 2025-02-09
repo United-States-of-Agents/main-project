@@ -169,7 +169,7 @@ export function ChatInterface({
         <div
             className={`fixed top-16 h-full w-md flex flex-col transition-transform ${
                 isChatting
-                    ? "translate-x-0 right-4"
+                    ? "translate-x-0 right-3"
                     : "translate-x-full right-0"
             }`}
         >
@@ -228,7 +228,12 @@ export function ChatInterface({
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             className="border-0 focus-visible:ring-0 shadow-none"
-                            onKeyDown={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => {
+                                e.stopPropagation();
+                                if (e.key === "Enter") {
+                                    handleSendMessage();
+                                }
+                            }}
                             onFocus={() => {
                                 EventBus.emit("disable-game-input");
                             }}
