@@ -12,6 +12,7 @@ import {
     Network,
     CreateAction
 } from "@coinbase/agentkit";
+import {Wallet, Coinbase} from "@coinbase/coinbase-sdk";
 import { getLangChainTools } from "@coinbase/agentkit-langchain";
 import { HumanMessage } from "@langchain/core/messages";
 import { MemorySaver } from "@langchain/langgraph";
@@ -113,7 +114,14 @@ export default async function handler(
               };
           
               const walletProvider = await CdpWalletProvider.configureWithWallet(config);
-          
+              // Coinbase.configure({
+              //   apiKeyName: config.apiKeyName as string,
+              //   privateKey: config.apiKeyPrivateKey as string,
+              //   source: "agentkit",
+              //   sourceVersion: '^0.1.2',
+              // });
+              // const wallet = Wallet.
+
               // Initialize AgentKit
               const agentkit = await AgentKit.from({
                 walletProvider,
@@ -122,18 +130,18 @@ export default async function handler(
                   outsourcingAction,
                   endConversationAction,
                   rejectTaskAction,
-                  // wethActionProvider(),
-                  // pythActionProvider(),
-                  // walletActionProvider(),
-                  // erc20ActionProvider(),
-                  // cdpApiActionProvider({
-                  //   apiKeyName: process.env.TOKEN_SWAPPER_CDP_API_KEY_NAME,
-                  //   apiKeyPrivateKey: process.env.TOKEN_SWAPPER_CDP_API_KEY_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-                  // }),
-                  // cdpWalletActionProvider({
-                  //   apiKeyName: process.env.TOKEN_SWAPPER_CDP_API_KEY_NAME,
-                  //   apiKeyPrivateKey: process.env.TOKEN_SWAPPER_CDP_API_KEY_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-                  // }),
+                  wethActionProvider(),
+                  pythActionProvider(),
+                  walletActionProvider(),
+                  erc20ActionProvider(),
+                  cdpApiActionProvider({
+                    apiKeyName: process.env.TOKEN_SWAPPER_CDP_API_KEY_NAME,
+                    apiKeyPrivateKey: process.env.TOKEN_SWAPPER_CDP_API_KEY_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+                  }),
+                  cdpWalletActionProvider({
+                    apiKeyName: process.env.TOKEN_SWAPPER_CDP_API_KEY_NAME,
+                    apiKeyPrivateKey: process.env.TOKEN_SWAPPER_CDP_API_KEY_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+                  }),
                 ],
               });
           
@@ -166,35 +174,44 @@ export default async function handler(
           console.log("Token Swapper Agent initialized successfully!");
 
           async function runChatMode(agent: any, config: any) {
-          
             try {
-              const stream = await agent.stream({ messages: [new HumanMessage(userMessage)] }, config);
-        
-              for await (const chunk of stream) {
-                if ("agent" in chunk) {
-                  console.log(chunk.agent.messages[0].content);
-                } else if ("tools" in chunk) {
-                  console.log(chunk.tools.messages[0].content);
-                }
-                console.log("-------------------");
-              }
-            } catch (error) {
-              if (error instanceof Error) {
-                console.error("Error:", error.message);
-              }
-              process.exit(1);
-            }
-          }
-          
-          await runChatMode(agent, config);
-          
-        const response = null
+                const stream = await agent.stream(
+                    { messages: [new HumanMessage(userMessage)] },
+                    config
+                );
+                let collectedResponse = "";
 
-        // res.status(200).json({
-        //     response:
-        //         response.choices[0]?.message?.content ||
-        //         "I don't know that one!",
-        // });
+                for await (const chunk of stream) {
+                    if ("agent" in chunk) {
+                        console.log(
+                            "Agent Message:",
+                            chunk.agent.messages[0].content
+                        );
+                        collectedResponse +=
+                            chunk.agent.messages[0].content + " ";
+                    } else if ("tools" in chunk) {
+                        console.log(
+                            "Tools Message:",
+                            chunk.tools.messages[0].content
+                        );
+                        collectedResponse +=
+                            chunk.tools.messages[0].content + " ";
+                    }
+                    console.log("-------------------");
+                }
+
+                return collectedResponse.trim(); // Return the collected response
+            } catch (error) {
+                console.error("Error in runChatMode:", error.message);
+                throw error;
+            }
+        }
+          
+        const response = await runChatMode(agent, config);
+        
+        res.status(200).json({
+            response
+        });
     } catch (error) {
         console.error("OpenAI API Error:", error);
         res.status(500).json({ error: "Internal Server Error" });

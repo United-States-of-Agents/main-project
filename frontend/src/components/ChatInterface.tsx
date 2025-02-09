@@ -51,6 +51,10 @@ const AGENT_RESPONSES: Record<string, string[]> = {
     Linda: ["Hey!", "Hope you're having a great day!", "Let's chat!"],
 };
 
+const DEFAULT_MESSAGE: Record<string, string> ={
+    Sara: "Hi, I'm Sara. Welcome to the United States of AI Agents. I can help you find any agents that suits you. What are you looking for?"
+}
+
 type AgentData = {
     [key: string]: {
         url: string;
@@ -67,6 +71,10 @@ const agentData: AgentData = {
         url: `/api/coinbase-agents/twitterAnalysisAgent/agent`,
         address: "0x3C6294369a00437dC5f81Da293a4DE43e60023E9",
     },
+    Troy: {
+        url: `/api/coinbase-agents/tokenSwapperAgent/agent`,
+        address: DEFAULT_AGENT_ADDRESS,
+    }
 };
 
 const TIP_AMOUNTS = [1, 5, 10, 25, 50, 75, 100];
@@ -180,7 +188,7 @@ export function ChatInterface({
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         agentName: currentAgent,
-                        userMessage: message,
+                        userMessage: promptedMessage,
                     }),
                 });
 
@@ -269,13 +277,14 @@ export function ChatInterface({
                     await writeContract({
                         ...networkStateContractConfig,
                         functionName: 'payAgent',
-                        args: [DEFAULT_AGENT_ADDRESS, tip*10**18],
+                        args: [agentData[currentAgent].address, tip*10**18],
                     })
                     setTaskRequested(true);
                 }      
             }
         } else {
             handleSendMessage();
+            setTaskRequested(false);
         }
     };
 

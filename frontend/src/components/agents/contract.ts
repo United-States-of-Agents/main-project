@@ -111,6 +111,10 @@ export async function callAcceptTask(
   //   throw new Error("Task Already Accepted/Rejected");
   // }
 
+  console.log()
+  console.log("ACCEPTING TASK WITH ID:",  taskId);
+  console.log()
+
   // Call the Transaction
   const txEncodedData = encodeFunctionData({
     abi: NETWORK_STATE_ABI,
