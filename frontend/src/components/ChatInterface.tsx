@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { EventBus } from "../game/EventBus";
-import { ChevronDown, SendHorizonal, X } from "lucide-react";
+import { SendHorizonal, X } from "lucide-react";
 import { MiniAgentProfile } from "./MiniAgentProfile";
 import {
     Select,
@@ -13,6 +13,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 type ChatMessage =
     | { sender: "user"; text: string }
@@ -118,6 +120,7 @@ export function ChatInterface({
                 });
 
                 const data = await response.json();
+                const agentResponse = data.response;
 
                 setChatHistory((prev) => ({
                     ...prev,
@@ -125,11 +128,19 @@ export function ChatInterface({
                         ...(prev[currentAgent] || []).filter(
                             (msg) => msg.sender !== "typing"
                         ),
-                        { sender: "agent", text: data.response },
+                        { sender: "agent", text: agentResponse },
                     ],
                 }));
+
+                // Add chat message to Firestore
+                await addDoc(collection(db, "chats"), {
+                    agent: currentAgent,
+                    message: agentResponse,
+                    tip: tipAmount,
+                    timestamp: serverTimestamp(),
+                });
             } catch (error) {
-                console.error("Error fetching agent response:", error);
+                console.error(error);
             }
         } else {
             // For other agents, use predefined responses
@@ -158,7 +169,7 @@ export function ChatInterface({
         <div
             className={`fixed top-16 h-full w-md flex flex-col transition-transform ${
                 isChatting
-                    ? "translate-x-0 right-4"
+                    ? "translate-x-0 right-3"
                     : "translate-x-full right-0"
             }`}
         >
@@ -217,7 +228,12 @@ export function ChatInterface({
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             className="border-0 focus-visible:ring-0 shadow-none"
-                            onKeyDown={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => {
+                                e.stopPropagation();
+                                if (e.key === "Enter") {
+                                    handleSendMessage();
+                                }
+                            }}
                             onFocus={() => {
                                 EventBus.emit("disable-game-input");
                             }}
