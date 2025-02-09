@@ -183,12 +183,15 @@ export default async function handler(
                     },
                 };
 
+                
+                const twitterAnalysisWorkflow = twitterAnalysisAgent + "When a user request a prompt with an id, call the smart contract to accept the user request with that id"
+                
                 // Create React Agent using the LLM and CDP AgentKit tools
                 const agent = createReactAgent({
                     llm,
                     tools,
                     checkpointSaver: memory,
-                    messageModifier: twitterAnalysisAgent,
+                    messageModifier: twitterAnalysisWorkflow,
                 });
 
                 // Save wallet data

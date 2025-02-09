@@ -15,12 +15,19 @@ import {
 } from "@/components/ui/select";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { useReadContract, useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { networkStateContractConfig, tokenContractConfig } from '@/utils/wagmiContractConfig';
-import {Web3} from 'web3';
-import NetworkState from '@/utils/NetworkState.json';
-import USA from '@/utils/USA.json';
-import { task } from "@langchain/langgraph";
+import {
+    useReadContract,
+    useAccount,
+    useWriteContract,
+    useWaitForTransactionReceipt,
+} from "wagmi";
+import {
+    networkStateContractConfig,
+    tokenContractConfig,
+} from "@/utils/wagmiContractConfig";
+import { Web3 } from "web3";
+import NetworkState from "@/utils/NetworkState.json";
+import USA from "@/utils/USA.json";
 
 const web3 = new Web3(
     "https://base-sepolia.g.alchemy.com/v2/CIy2ezuBM2p9iHPNXw1jN_SMRelF4Gmq"
@@ -61,11 +68,10 @@ type AgentData = {
 const agentData: AgentData = {
     Sara: {
         url: "/api/travelling-salesman",
-        address: "0x13CA33C2F70145A960E030ef32509cA49702538d",
     },
     Leonardo: {
         url: `/api/coinbase-agents/twitterAnalysisAgent/agent`,
-        address: "0x3C6294369a00437dC5f81Da293a4DE43e60023E9",
+        address: "0x13CA33C2F70145A960E030ef32509cA49702538d",
     },
 };
 
@@ -84,7 +90,6 @@ export function ChatInterface({
         Record<string, ChatMessage[]>
     >({});
     const [message, setMessage] = useState("");
-    const [taskRequested, setTaskRequested] = useState(false);
     const [tipAmount, setTipAmount] = useState<number | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -105,6 +110,10 @@ export function ChatInterface({
             .call();
         return taskId;
     }
+
+    useEffect(() => {
+        async function checkAllowance() {}
+    }, []);
 
     useEffect(() => {
         if (isChatting && currentAgent) {
@@ -162,14 +171,6 @@ export function ChatInterface({
                 ],
             }));
         }, 500);
-        
-
-        let promptedMessage = message;
-        if(tipAmount){
-            const taskId = await getTaskId();
-            promptedMessage = `Help me approve the task request with the id ${taskId} in the Network State smart contract, then help me with: ` + message;
-            //alert(promptedMessage);
-        }
 
         // Fetch response from agent
         if (agentData[currentAgent]) {
@@ -208,21 +209,7 @@ export function ChatInterface({
                 console.error(error);
             }
         } else {
-            // const blabla = await fetch(
-            //     "/api/coinbase-agents/twitterAnalysisAgent/agent",
-            //     {
-            //       method: "POST",
-            //       headers: { "Content-Type": "application/json" },
-            //       body: JSON.stringify({
-            //         agentName: "twitterAnalysisAgent",
-            //         userMessage:
-            //           "Hi, I am a developer, can you send me some faucet tokens. Please do it on base-sepolia.",
-            //       }),
-            //     }
-            // );
-            
-            
-            // For other agents, use predefined responses
+            // For other agents without API, use hardcoded responses
             const fallbackResponse =
                 AGENT_RESPONSES[currentAgent]?.[
                     Math.floor(
@@ -251,28 +238,28 @@ export function ChatInterface({
         }
 
         // Confirm Tipping Transaction
-        const tip = tipAmount? tipAmount : 0;
-        if(tip > 0){
-            // Check Balances if tip amount is specified
-            if(parseInt(allowance? allowance.toString() : '0') < tip*10**18){
-                // Request Token Approval if allowance is not enough
+        const tip = tipAmount ? tipAmount : 0;
+        if (tip > 0) {
+            if (
+                parseInt(allowance ? allowance.toString() : "0") <
+                tip * 10 ** 18
+            ) {
                 await approveToken({
                     ...tokenContractConfig,
-                    functionName: 'approve',
-                    args: ['0x04A951420393160617BfBF0017464E256d4C4468', tip*5*10**18],
-                })
-            }else{
-                // Send Message if request has been approved
-                if(taskRequested){
-                    handleSendMessage();
-                }else{
-                    await writeContract({
-                        ...networkStateContractConfig,
-                        functionName: 'payAgent',
-                        args: [DEFAULT_AGENT_ADDRESS, tip*10**18],
-                    })
-                    setTaskRequested(true);
-                }      
+                    functionName: "approve",
+                    args: [
+                        "0x04A951420393160617BfBF0017464E256d4C4468",
+                        tip * 5 * 10 ** 18,
+                    ],
+                });
+            } else {
+                if(!currentAgent){alert("Agent Not Found");return;}
+                await writeContract({
+                    ...networkStateContractConfig,
+                    functionName: "payAgent",
+                    args: [agentData[currentAgent].address, tip * 10 ** 18],
+                });
+                //handleSendMessage();
             }
         } else {
             handleSendMessage();
