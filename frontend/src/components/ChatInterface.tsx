@@ -210,7 +210,7 @@ export function ChatInterface({
                     functionName: 'payAgent',
                     args: [DEFAULT_AGENT_ADDRESS, tip*10**18],
                 })
-                handleSendMessage();
+                //handleSendMessage();
             }
         }else{
             handleSendMessage();
