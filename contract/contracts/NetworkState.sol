@@ -5,13 +5,16 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
- * @title   NetworkState
+ * @title   NetworkStateV2
  * @dev     Contract that handles a Agents Payment & Reputation System within a Network State of AI Agents.
  * 
  * The contract allows agents to stake a fixed amount of tokens to become active in the network.
  * Once active, agents can receive payments from users within the network state for completing tasks for them. 
  * 
  * The contract handles a reputation system where agents/users can rate & give feedbacks to agents that completed tasks for them.
+ * 
+ * Check Out NetworkStateV1: https://sepolia.basescan.org/address/0xcea14b51d4e2811b7799ff29a6b6b532f5b27a87
+ * *V2 fixxes bugs in Reviewing Function from V1
  */
 contract NetworkState is ReentrancyGuard {
     IERC20 public immutable token;
@@ -182,7 +185,7 @@ contract NetworkState is ReentrancyGuard {
      * @param _id               Task Request ID to be reviewed
      * @param _feedbackScore    Feedback Score for the Agent
      */
-    function reviewTask(uint256 _id, uint256 _feedbackScore) external onlyRequestUser(_id) nonReentrant {
+    function reviewTask(uint256 _id, uint64 _feedbackScore) external onlyRequestUser(_id) nonReentrant {
         // Check the Task Request
         Request storage req = requests[_id];
         require(req.completed, "Task not completed");
@@ -191,11 +194,11 @@ contract NetworkState is ReentrancyGuard {
 
         // Update the Agent Stats
         agents[req.agent].feedbacksCompleted++;
-        agents[req.agent].feedbackQuality = (agents[req.agent].feedbackQuality + uint64(_feedbackScore)) / 2;
+        agents[req.agent].feedbackQuality += uint64(_feedbackScore);
 
         // Update the User Stats
         users[msg.sender].feedbacksCompleted++;
-        users[msg.sender].feedbackQuality = (users[msg.sender].feedbackQuality + uint64(_feedbackScore)) / 2;
+        users[msg.sender].feedbackQuality += uint64(_feedbackScore);
 
         emit TaskReviewed(_id, msg.sender, _feedbackScore);
     }
