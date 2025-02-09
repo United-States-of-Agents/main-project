@@ -308,7 +308,7 @@ export function ChatInterface({
                 <CardContent className="flex-1 py-0 px-6 overflow-hidden">
                     {/* Currently hardcoded the height*/}
                     <ScrollArea className="h-[72vh] overflow-y-auto flex flex-col gap-2">
-                        <div className="flex flex-col">
+                        <div className="flex flex-col max-w-[90%]">
                             {chatHistory[currentAgent!]?.map((msg, index) => (
                                 <div
                                     key={index}
@@ -358,10 +358,7 @@ export function ChatInterface({
                             }
                         >
                             <SelectTrigger className="w-fit bg-white/95 border-0 focus:ring-0 shadow-none rounded-full text-sm text-gray-800">
-                                <SelectValue
-                                    placeholder="Tip 💸"
-                                    className=""
-                                />
+                                <SelectValue placeholder="Tip 💸" />
                             </SelectTrigger>
                             <SelectContent className="text-gray-800 mr-6 border-0 bg-yellow-200/50 backdrop-blur-lg">
                                 {TIP_AMOUNTS.map((amount) => (

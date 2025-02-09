@@ -43,7 +43,7 @@ export function MiniAgentProfile({
     };
 
     return (
-        <div className="flex flex-col p-3 bg-yellow-100 rounded-xl shadow-md">
+        <div className="flex flex-col p-3 bg-yellow-100 rounded-xl shadow-md border-b-2 border-b-yellow-500/50">
             <div className="flex items-center space-x-3">
                 {/* Avatar */}
                 <Avatar className="w-12 h-12 border-2 border-yellow-500 shadow-md">
