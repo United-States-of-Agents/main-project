@@ -9,6 +9,7 @@ import Provider from "@/components/connection/WagmiProvider";
 import UserProfile from "@/components/UserProfile";
 import { ControlGuide } from "./components/ControlGuide";
 
+
 function App() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
     const [isChatting, setIsChatting] = useState(false);

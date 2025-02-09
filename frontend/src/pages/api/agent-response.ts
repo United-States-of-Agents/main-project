@@ -18,7 +18,7 @@ export default async function handler(
     if (!agentName || !userMessage) {
         return res.status(400).json({ error: "Missing required parameters" });
     }
-
+    //console.log(userMessage);
     try {
         const response = await openai.chat.completions.create({
             model: "gpt-4o-mini",
