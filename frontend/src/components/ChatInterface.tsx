@@ -15,11 +15,19 @@ import {
 } from "@/components/ui/select";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { useReadContract, useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { networkStateContractConfig, tokenContractConfig } from '@/utils/wagmiContractConfig';
-import {Web3} from 'web3';
-import NetworkState from '@/utils/NetworkState.json';
-import USA from '@/utils/USA.json';
+import {
+    useReadContract,
+    useAccount,
+    useWriteContract,
+    useWaitForTransactionReceipt,
+} from "wagmi";
+import {
+    networkStateContractConfig,
+    tokenContractConfig,
+} from "@/utils/wagmiContractConfig";
+import { Web3 } from "web3";
+import NetworkState from "@/utils/NetworkState.json";
+import USA from "@/utils/USA.json";
 import { task } from "@langchain/langgraph";
 
 const web3 = new Web3(
@@ -170,12 +178,13 @@ export function ChatInterface({
                 ],
             }));
         }, 500);
-        
 
         let promptedMessage = message;
-        if(tipAmount){
+        if (tipAmount) {
             const taskId = await getTaskId();
-            promptedMessage = `Help me approve the task request with the id ${taskId} in the Network State smart contract, then help me with: ` + message;
+            promptedMessage =
+                `Help me approve the task request with the id ${taskId} in the Network State smart contract, then help me with: ` +
+                message;
             //alert(promptedMessage);
         }
 
@@ -228,8 +237,7 @@ export function ChatInterface({
             //       }),
             //     }
             // );
-            
-            
+
             // For other agents, use predefined responses
             const fallbackResponse =
                 AGENT_RESPONSES[currentAgent]?.[
@@ -259,28 +267,34 @@ export function ChatInterface({
         }
 
         // Confirm Tipping Transaction
-        const tip = tipAmount? tipAmount : 0;
-        if(tip > 0){
+        const tip = tipAmount ? tipAmount : 0;
+        if (tip > 0) {
             // Check Balances if tip amount is specified
-            if(parseInt(allowance? allowance.toString() : '0') < tip*10**18){
+            if (
+                parseInt(allowance ? allowance.toString() : "0") <
+                tip * 10 ** 18
+            ) {
                 // Request Token Approval if allowance is not enough
                 await approveToken({
                     ...tokenContractConfig,
-                    functionName: 'approve',
-                    args: ['0x04A951420393160617BfBF0017464E256d4C4468', tip*5*10**18],
-                })
-            }else{
+                    functionName: "approve",
+                    args: [
+                        "0x04A951420393160617BfBF0017464E256d4C4468",
+                        tip * 5 * 10 ** 18,
+                    ],
+                });
+            } else {
                 // Send Message if request has been approved
-                if(taskRequested){
+                if (taskRequested) {
                     handleSendMessage();
-                }else{
+                } else {
                     await writeContract({
                         ...networkStateContractConfig,
                         functionName: 'payAgent',
                         args: [agentData[currentAgent].address, tip*10**18],
                     })
                     setTaskRequested(true);
-                }      
+                }
             }
         } else {
             handleSendMessage();
@@ -318,17 +332,17 @@ export function ChatInterface({
                 )}
 
                 {/* Chat Messages */}
-                <CardContent className="flex-1 py-0 px-6 overflow-hidden">
+                <CardContent className="flex-1 p-0">
                     {/* Currently hardcoded the height*/}
                     <ScrollArea className="h-[72vh] overflow-y-auto flex flex-col gap-2">
-                        <div className="flex flex-col max-w-[90%]">
+                        <div className="flex flex-col">
                             {chatHistory[currentAgent!]?.map((msg, index) => (
                                 <div
                                     key={index}
                                     className={`mx-1 p-2 px-3 rounded-2xl shadow-xs max-w-[75%] my-2 bg-white/95 text-zinc-700 border-0 break-words ${
                                         msg.sender === "user"
-                                            ? "shadow-blue-700 self-end text-right"
-                                            : "shadow-purple-600 self-start text-left"
+                                            ? "shadow-blue-700 self-end text-right mr-5"
+                                            : "shadow-purple-600 self-start text-left ml-4"
                                     }`}
                                 >
                                     {msg.sender === "typing" ? (
