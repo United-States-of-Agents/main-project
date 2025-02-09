@@ -44,7 +44,6 @@ export function MiniAgentProfile({
 
     return (
         <div className="flex flex-col p-3 bg-yellow-100 rounded-xl shadow-md">
-            {/* Name, Address, and Rating */}
             <div className="flex items-center space-x-3">
                 {/* Avatar */}
                 <Avatar className="w-12 h-12 border-2 border-yellow-500 shadow-md">
@@ -60,9 +59,14 @@ export function MiniAgentProfile({
                         {agentName}
                     </p>
                     <div className="flex items-center space-x-1">
-                        <p className="text-sm text-gray-500">
+                        <a
+                            href={`https://sepolia.basescan.org/address/${agentAddress}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-gray-500 transition-colors hover:text-gray-700"
+                        >
                             {truncateAddress(agentAddress)}
-                        </p>
+                        </a>
                         <button
                             onClick={handleCopy}
                             className="text-gray-500 transition-colors hover:text-black pl-0.5"
