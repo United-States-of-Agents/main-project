@@ -2,7 +2,7 @@ import NetworkState from "./NetworkState.json"
 import USA from "./USA.json"
 
 export const networkStateContractConfig = {
-    address: '0xCEa14b51d4E2811b7799fF29A6B6b532f5B27A87',
+    address: '0x04A951420393160617BfBF0017464E256d4C4468',
     abi: NetworkState.abi,
 } as const
 

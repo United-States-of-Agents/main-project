@@ -11,6 +11,7 @@ import PayAgent from "@/components/agents/PayAgent";
 import CreateAgent from "@/components/agents/CreateAgent";
 import AcceptTask from "@/components/agents/AcceptTask";
 import AddReview from "@/components/agents/AddReview";
+import TxBuilder from "@/components/agents/TxBuilder";
 
 function App() {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
@@ -49,8 +50,9 @@ function App() {
                 {/* #TODO: Web3 Connections For Navbar Here */}
                 <div className="w-screen h-screen bg-black">
                     <ConnectButton/>
-                    <UserProfile />
-                    <AgentsProfile/>
+                    {/*<UserProfile />
+                    <AgentsProfile/>*/}
+                    <TxBuilder/>
                     <AcceptTask />
                     <PayAgent/>
                     <CreateAgent/>

@@ -44,7 +44,7 @@ export default function AgentsProfile(){
                     </Avatar>
                     <div className="text-sm text-muted-foreground text-center">
                         <p className="font-medium">Wallet Address</p>
-                        <p>{data?.toString()}</p>
+                        {/*<p>{data?.toString()}</p>*/}
                         <p className="font-mono">{truncateAddress(address?address:"")}</p>
                     </div>
                 </div>

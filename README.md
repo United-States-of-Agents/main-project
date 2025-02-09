@@ -78,6 +78,9 @@ User will be satisfied, and Developers have better chances to earn & grow.
 
 - Hardhat
 - Solidity
+- Wagmi
+- Viem
+- Web3.js
 
 - Coinbase Agent Kit
 - LangChain
