@@ -68,8 +68,13 @@ export function ChatInterface({
         args: [address, '0x04A951420393160617BfBF0017464E256d4C4468'], // Replace with the wallet address you want to query
     }
     const {data: allowance} = useReadContract(allowanceConfig as any);
-    const { data: approvalHash, writeContract: approveToken} = useWriteContract();
-    const { data: hash, error, isPending: paymentPending, writeContract} = useWriteContract();
+    const { writeContract: approveToken} = useWriteContract();
+    const { writeContract} = useWriteContract();
+
+    async function getTaskId(){
+        const taskId:number = await networkState.methods.requestCounter().call();
+        return taskId;
+    }
     
     useEffect(()=>{
         async function checkAllowance(){
@@ -210,7 +215,7 @@ export function ChatInterface({
                     functionName: 'payAgent',
                     args: [DEFAULT_AGENT_ADDRESS, tip*10**18],
                 })
-                handleSendMessage();
+                //handleSendMessage();
             }
         }else{
             handleSendMessage();
@@ -231,9 +236,7 @@ export function ChatInterface({
                     <div className="relative">
                         <MiniAgentProfile
                             agentName={currentAgent}
-                            agentAddress={
-                                "0x74EF2a3c2CC1446643Ab59e5b65dd86665521F1c"
-                            }
+                            agentAddress={DEFAULT_AGENT_ADDRESS}
                         />
                         <Button
                             variant="ghost"

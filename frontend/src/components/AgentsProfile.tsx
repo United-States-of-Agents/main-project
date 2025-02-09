@@ -11,13 +11,13 @@ import {
 } from "@/components/display/AgentInfo";
 import { TokenLogo } from "./ProfileCard";
 
-const agentAddress = "0x74EF2a3c2CC1446643Ab59e5b65dd86665521F1c";
+const DEFAULT_AGENT_ADDRESS = '0x13CA33C2F70145A960E030ef32509cA49702538d';
 
 export default function AgentsProfile() {
     const contractConfig = {
         ...networkStateContractConfig,
         functionName: "agents",
-        args: [agentAddress],
+        args: [DEFAULT_AGENT_ADDRESS],
     };
     const { data } = useReadContract(contractConfig);
 
@@ -25,7 +25,7 @@ export default function AgentsProfile() {
 
     return (
         <ProfileCard
-            address={agentAddress}
+            address={DEFAULT_AGENT_ADDRESS}
             profileType="agent"
             infoRows={[
                 {
@@ -37,7 +37,7 @@ export default function AgentsProfile() {
                 },
                 {
                     label: "Token Balance",
-                    value: <Balance address={agentAddress} />,
+                    value: <Balance address={DEFAULT_AGENT_ADDRESS} />,
                     icon: <TokenLogo />,
                 },
                 {
